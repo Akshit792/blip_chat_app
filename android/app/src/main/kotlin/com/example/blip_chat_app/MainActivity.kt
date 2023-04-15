@@ -1,4 +1,4 @@
-package com.example.blip_chat_app
+package com.example.blipchatapp
 
 import io.flutter.embedding.android.FlutterActivity
 

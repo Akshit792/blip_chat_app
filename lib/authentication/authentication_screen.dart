@@ -1,3 +1,4 @@
+import 'package:blip_chat_app/authentication/apis.dart';
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:flutter/material.dart';
 
@@ -80,7 +81,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
             padding: const EdgeInsets.symmetric(vertical: 20),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-            onPressed: () {},
+            onPressed: Apis().loginAction,
             child: const Text(
               'SignIn/SignUp',
               style: TextStyle(

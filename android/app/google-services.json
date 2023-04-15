@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "101881380013",
+    "project_id": "blip-chat-app-1b25b",
+    "storage_bucket": "blip-chat-app-1b25b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:101881380013:android:07cd99119ba6d6a7ef5a24",
+        "android_client_info": {
+          "package_name": "com.example.blipchatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "101881380013-actsdn1gsua4agvpav3l0j9j1mbghgfs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDn1Rl63JKJw_pMBqpelg6zmH_bXyWpkNc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "101881380013-actsdn1gsua4agvpav3l0j9j1mbghgfs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "101881380013-j9623rho7vc68pjsp41dj9plvpnqqqq7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.blipChatApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
