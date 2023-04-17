@@ -1,11 +1,14 @@
 import 'dart:io';
-
 import 'package:blip_chat_app/authentication/authentication_screen.dart';
+import 'package:blip_chat_app/authentication/bloc/authentication_bloc.dart';
+import 'package:blip_chat_app/common/repository/auth_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   if (Platform.isIOS) {
     await Firebase.initializeApp(
         options: const FirebaseOptions(
@@ -17,7 +20,9 @@ void main() async {
     await Firebase.initializeApp();
   }
 
-  runApp(const MyApp());
+  runApp(MultiRepositoryProvider(providers: [
+    RepositoryProvider<AuthRepository>(create: (context) => AuthRepository()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -25,13 +30,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        fontFamily: 'Inter',
-        primarySwatch: Colors.blue,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthenticationBloc>(
+          create: (BuildContext context) => AuthenticationBloc(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          fontFamily: 'Inter',
+          primarySwatch: Colors.blue,
+        ),
+        home: const AuthenticationScreen(),
       ),
-      home: const AuthenticationScreen(),
     );
   }
 }

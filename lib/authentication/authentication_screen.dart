@@ -1,6 +1,9 @@
-import 'package:blip_chat_app/authentication/apis.dart';
+import 'package:blip_chat_app/authentication/bloc/authentication_bloc.dart';
+import 'package:blip_chat_app/authentication/bloc/authentication_event.dart';
+import 'package:blip_chat_app/authentication/bloc/authentication_state.dart';
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AuthenticationScreen extends StatefulWidget {
   const AuthenticationScreen({super.key});
@@ -13,16 +16,20 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
-    return Scaffold(
-        body: SizedBox(
-      height: screenHeight,
-      child: Column(
-        children: [
-          _buildAuthScreenImage(screenHeight),
-          _buildLogoTextAndLoginButton()
-        ],
-      ),
-    ));
+    return BlocBuilder<AuthenticationBloc, AuthenticationState>(
+      builder: (context, state) {
+        return Scaffold(
+            body: SizedBox(
+          height: screenHeight,
+          child: Column(
+            children: [
+              _buildAuthScreenImage(screenHeight),
+              _buildLogoTextAndLoginButton()
+            ],
+          ),
+        ));
+      },
+    );
   }
 
   Widget _buildAuthScreenImage(dynamic screenHeight) {
@@ -81,7 +88,10 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
             padding: const EdgeInsets.symmetric(vertical: 20),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-            onPressed: Apis().loginAction,
+            onPressed: () {
+              BlocProvider.of<AuthenticationBloc>(context)
+                  .add(AuthenticationLoginEvent(context: context));
+            },
             child: const Text(
               'SignIn/SignUp',
               style: TextStyle(
