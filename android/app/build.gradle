@@ -52,7 +52,7 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        manifestPlaceholders += [auth0Domain: "hasknosiit.us.auth0.com", auth0Scheme: "hasknosiit"]
+        manifestPlaceholders += ['appAuthRedirectScheme': 'com.example.booksella']
     }
 
     buildTypes {

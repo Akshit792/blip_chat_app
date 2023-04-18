@@ -1,10 +1,10 @@
 PODS:
-  - Auth0 (2.3.2):
-    - JWTDecode (~> 3.0)
-    - SimpleKeychain (~> 1.0)
-  - auth0_flutter (1.1.0):
-    - Auth0 (~> 2.3)
-    - Flutter
+  - AppAuth (1.6.0):
+    - AppAuth/Core (= 1.6.0)
+    - AppAuth/ExternalUserAgent (= 1.6.0)
+  - AppAuth/Core (1.6.0)
+  - AppAuth/ExternalUserAgent (1.6.0):
+    - AppAuth/Core
   - Firebase/CoreOnly (10.7.0):
     - FirebaseCore (= 10.7.0)
   - firebase_core (2.9.0):
@@ -17,51 +17,48 @@ PODS:
   - FirebaseCoreInternal (10.8.0):
     - "GoogleUtilities/NSData+zlib (~> 7.8)"
   - Flutter (1.0.0)
+  - flutter_appauth (0.0.1):
+    - AppAuth (= 1.6.0)
+    - Flutter
   - GoogleUtilities/Environment (7.11.1):
     - PromisesObjC (< 3.0, >= 1.2)
   - GoogleUtilities/Logger (7.11.1):
     - GoogleUtilities/Environment
   - "GoogleUtilities/NSData+zlib (7.11.1)"
-  - JWTDecode (3.0.1)
   - PromisesObjC (2.2.0)
-  - SimpleKeychain (1.0.1)
 
 DEPENDENCIES:
-  - auth0_flutter (from `.symlinks/plugins/auth0_flutter/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
+  - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
 
 SPEC REPOS:
   trunk:
-    - Auth0
+    - AppAuth
     - Firebase
     - FirebaseCore
     - FirebaseCoreInternal
     - GoogleUtilities
-    - JWTDecode
     - PromisesObjC
-    - SimpleKeychain
 
 EXTERNAL SOURCES:
-  auth0_flutter:
-    :path: ".symlinks/plugins/auth0_flutter/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
   Flutter:
     :path: Flutter
+  flutter_appauth:
+    :path: ".symlinks/plugins/flutter_appauth/ios"
 
 SPEC CHECKSUMS:
-  Auth0: 64da28fdc5cd499aa516dc4bfd0ace8efae2c1da
-  auth0_flutter: 2db6426f2a0489ff64318a0d2602a54aa9eef796
+  AppAuth: 8fca6b5563a5baef2c04bee27538025e4ceb2add
   Firebase: 0219acf760880eeec8ce479895bd7767466d9f81
   firebase_core: d85432877e814811e040e7659f9c82faeab66e04
   FirebaseCore: e317665b9d744727a97e623edbbed009320afdd7
   FirebaseCoreInternal: fa2899eb1f340054858d289e5a0fb935a0a74e52
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_appauth: 525652bda90e43ca5eb7ed748ecc106b79d1f5a1
   GoogleUtilities: 9aa0ad5a7bc171f8bae016300bfcfa3fb8425749
-  JWTDecode: 2eed97c2fa46ccaf3049a787004eedf0be474a87
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
-  SimpleKeychain: 130211269f88f038d7dc5254cf0b1b9ce978c398
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 
