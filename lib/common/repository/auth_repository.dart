@@ -94,7 +94,8 @@ class AuthRepository {
     }
   }
 
-  isAuthResponseValid(AuthorizationTokenResponse? authorizationTokenResponse) {
+  bool isAuthResponseValid(
+      AuthorizationTokenResponse? authorizationTokenResponse) {
     return (authorizationTokenResponse != null &&
         authorizationTokenResponse.idToken != null &&
         authorizationTokenResponse.accessToken != null);
