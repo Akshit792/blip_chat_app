@@ -1,12 +1,31 @@
 import 'dart:convert';
 
+import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/auth0_id_token.dart';
+import 'package:blip_chat_app/common/models/logger.dart';
+import 'package:flutter_appauth/flutter_appauth.dart';
 
 class AuthRepository {
   Auth0IdToken? idToken;
+  final FlutterAppAuth _appAuth = const FlutterAppAuth();
 
   Future<void> loginAction() async {
-    try {} catch (e) {
+    try {
+      AuthorizationTokenRequest tokenRequest = AuthorizationTokenRequest(
+          Constants.AUTH0_CLIENT_ID, Constants.Auth0_REDIRECT_URL,
+          issuer: Constants.AUTH0_ISSUER,
+          scopes: [
+            'openid',
+            'profile',
+            'email',
+            'offline_access',
+          ],
+          promptValues: [
+            'login'
+          ]);
+
+      var response = await _appAuth.authorizeAndExchangeCode(tokenRequest);
+    } catch (e) {
       rethrow;
     }
   }
