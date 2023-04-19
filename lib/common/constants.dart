@@ -1,5 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
+enum AuthResultType { success, error }
+
 class Constants {
   static const personImagePlaceHolder =
       "assets/images/auth_screen_ui_element.png";
