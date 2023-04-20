@@ -37,27 +37,58 @@ class AuthRepository {
 
       return resultType;
     } catch (e, s) {
-      LogPrint.error(errorMsg: "$e Auth0 Login Action $s");
+      LogPrint.error(errorMsg: "$e ${e.runtimeType} Auth0 Login Action $s");
+      return AuthResultType.error;
+    }
+  }
+
+  Future<AuthResultType> revalidateUser() async {
+    try {
+      var secureRefreshToken =
+          await _secureStorage.read(key: Constants.refreshTokenKey);
+
+      if (secureRefreshToken == null) {
+        LogPrint.info(infoMsg: "Token Revalidation Failed");
+        return AuthResultType.error;
+      }
+
+      TokenRequest tokenRequest = TokenRequest(
+        Constants.AUTH0_CLIENT_ID,
+        Constants.Auth0_REDIRECT_URL,
+        issuer: Constants.AUTH0_ISSUER,
+        refreshToken: secureRefreshToken,
+      );
+
+      TokenResponse? tokenResponse = await _appAuth.token(tokenRequest);
+
+      final result =
+          await _setLocalVariables(authorizationTokenResponse: tokenResponse);
+
+      return result;
+    } catch (e, s) {
+      LogPrint.info(infoMsg: "Token Revalidation Failed");
+      LogPrint.error(errorMsg: "$e ${e.runtimeType} Revalidate User $s");
       return AuthResultType.error;
     }
   }
 
   Future<AuthResultType> _setLocalVariables(
-      {required AuthorizationTokenResponse? authorizationTokenResponse}) async {
+      {required TokenResponse? authorizationTokenResponse}) async {
     if (isAuthResponseValid(authorizationTokenResponse)) {
       _secureStorage.write(
-          key: Constants.idTokenKey,
-          value: authorizationTokenResponse!.idToken);
-      _secureStorage.write(
           key: Constants.accessTokenKey,
-          value: authorizationTokenResponse.accessToken);
+          value: authorizationTokenResponse!.accessToken);
+
+      _secureStorage.write(
+          key: Constants.refreshTokenKey,
+          value: authorizationTokenResponse.refreshToken);
 
       idToken = _parseIdToken(idToken: authorizationTokenResponse.idToken!);
 
-      await _getUserDetails(
+      bool resultType = await _getUserDetails(
           accessToken: authorizationTokenResponse.accessToken!);
 
-      return AuthResultType.success;
+      return resultType ? AuthResultType.success : AuthResultType.error;
     }
 
     return AuthResultType.error;
@@ -76,7 +107,7 @@ class AuthRepository {
     return Auth0IdToken.fromJson(json);
   }
 
-  Future<AuthResultType> _getUserDetails({required String accessToken}) async {
+  Future<bool> _getUserDetails({required String accessToken}) async {
     try {
       final url = Uri.https(Constants.AUTH0_DOMAIN, "/userinfo");
 
@@ -88,17 +119,18 @@ class AuthRepository {
         auth0Profile = Auth0Profile.fromJson(jsonDecode(response.body));
       }
 
-      return AuthResultType.success;
-    } catch (e) {
-      return AuthResultType.error;
+      return true;
+    } catch (e, s) {
+      LogPrint.error(errorMsg: '$e ${e.runtimeType} Get User Details $s');
+      return false;
     }
   }
 
-  bool isAuthResponseValid(
-      AuthorizationTokenResponse? authorizationTokenResponse) {
+  bool isAuthResponseValid(TokenResponse? authorizationTokenResponse) {
     return (authorizationTokenResponse != null &&
         authorizationTokenResponse.idToken != null &&
-        authorizationTokenResponse.accessToken != null);
+        authorizationTokenResponse.accessToken != null &&
+        authorizationTokenResponse.refreshToken != null);
   }
 }
 

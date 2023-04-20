@@ -1,5 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 enum AuthResultType { success, error }
 
 class Constants {
@@ -15,4 +17,12 @@ class Constants {
 
   static const idTokenKey = "id_token";
   static const accessTokenKey = "access_token";
+  static const refreshTokenKey = "refresh_token";
+
+  static getToken({required tokenType}) async {
+    var secureStorage = const FlutterSecureStorage();
+    String? refreshToken = await secureStorage.read(key: tokenType);
+
+    return refreshToken;
+  }
 }

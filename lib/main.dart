@@ -1,7 +1,8 @@
 import 'dart:io';
-import 'package:blip_chat_app/authentication/authentication_screen.dart';
 import 'package:blip_chat_app/authentication/bloc/authentication_bloc.dart';
 import 'package:blip_chat_app/common/repository/auth_repository.dart';
+import 'package:blip_chat_app/splash/bloc/splash_bloc.dart';
+import 'package:blip_chat_app/splash/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,6 +36,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<AuthenticationBloc>(
           create: (BuildContext context) => AuthenticationBloc(),
         ),
+        BlocProvider<SplashBloc>(
+          create: (BuildContext context) => SplashBloc(),
+        ),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -42,7 +46,7 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Inter',
           primarySwatch: Colors.blue,
         ),
-        home: const AuthenticationScreen(),
+        home: const SplashScreen(),
       ),
     );
   }

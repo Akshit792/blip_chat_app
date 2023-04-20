@@ -1,7 +1,11 @@
+import 'package:blip_chat_app/splash/bloc/splash_bloc.dart';
+import 'package:blip_chat_app/splash/bloc/splash_event.dart';
+import 'package:blip_chat_app/splash/bloc/splash_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class SpalshScreen extends StatelessWidget {
-  const SpalshScreen({super.key});
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +24,37 @@ class SpalshScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+      bottomNavigationBar: BlocConsumer<SplashBloc, SplashState>(
+        listener: (context, state) {},
+        builder: (context, state) {
+          if (state is InitialSplashState) {
+            BlocProvider.of<SplashBloc>(context)
+                .add(CheckAuthStatusSplashEvent(context: context));
+          }
+
+          return state is AuthStatusLoadingSplashState
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 50.0),
+                      child: SizedBox(
+                        height: 25,
+                        width: 25,
+                        child: CircularProgressIndicator(
+                          color: Colors.black,
+                          strokeWidth: 2.8,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : const SizedBox(
+                  height: 0,
+                  width: 0,
+                );
+        },
       ),
     );
   }

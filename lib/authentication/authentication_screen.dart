@@ -24,7 +24,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
           child: Column(
             children: [
               _buildAuthScreenImage(screenHeight),
-              _buildLogoTextAndLoginButton()
+              _buildLogoTextAndLoginButton(authState: state)
             ],
           ),
         ));
@@ -41,7 +41,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     );
   }
 
-  Widget _buildLogoTextAndLoginButton() {
+  Widget _buildLogoTextAndLoginButton(
+      {required AuthenticationState authState}) {
     return Expanded(
         child: Container(
       width: double.infinity,
