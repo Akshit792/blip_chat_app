@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:blip_chat_app/authentication/bloc/authentication_bloc.dart';
 import 'package:blip_chat_app/common/repository/auth_repository.dart';
+import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';
 import 'package:blip_chat_app/splash/bloc/splash_bloc.dart';
 import 'package:blip_chat_app/splash/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -38,6 +39,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<SplashBloc>(
           create: (BuildContext context) => SplashBloc(),
+        ),
+        BlocProvider<HomeScreenBloc>(
+          create: (BuildContext context) => HomeScreenBloc(),
         ),
       ],
       child: MaterialApp(

@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:blip_chat_app/all_chats/all_chats_screen.dart';
+import 'package:blip_chat_app/home/home_screen.dart';
 import 'package:blip_chat_app/authentication/authentication_screen.dart';
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/logger.dart';
@@ -22,7 +22,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         Navigator.of(event.context)
             .pushReplacement(MaterialPageRoute(builder: (context) {
           return tokenReValidationStatus == AuthResultType.success
-              ? const AllChatsScreen()
+              ? const HomeScreen()
               : const AuthenticationScreen();
         }));
       } catch (e, s) {

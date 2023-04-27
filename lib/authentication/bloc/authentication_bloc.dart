@@ -1,7 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:blip_chat_app/all_chats/all_chats_screen.dart';
+import 'package:blip_chat_app/home/home_screen.dart';
 import 'package:blip_chat_app/common/constants.dart';
+import 'package:blip_chat_app/common/helpers.dart';
 import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:blip_chat_app/common/repository/auth_repository.dart';
 import 'package:flutter/material.dart';
@@ -21,14 +22,14 @@ class AuthenticationBloc
 
         if (authResultType == AuthResultType.success) {
           var refreshToken =
-              Constants.getToken(tokenType: Constants.refreshTokenKey);
+              Helpers.getToken(tokenType: Constants.refreshTokenKey);
 
           if (refreshToken != null) {
             LogPrint.info(infoMsg: "refresh token : $refreshToken");
 
             Navigator.of(event.context)
                 .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const AllChatsScreen();
+              return const HomeScreen();
             }));
           } else {
             // show an error dialog

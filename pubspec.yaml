@@ -74,6 +74,10 @@ flutter:
   assets:
     - assets/images/auth_screen_ui_element.png
     - assets/images/security_check.png
+    - assets/images/message_icon.png
+    - assets/images/person_icon.png
+    - assets/images/phone_icon.png
+    - assets/images/search_icon.png
    
 
   # An image asset can refer to one or more resolution-specific "variants", see
