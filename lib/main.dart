@@ -1,12 +1,15 @@
 import 'dart:io';
 import 'package:blip_chat_app/authentication/bloc/authentication_bloc.dart';
+import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/repository/auth_repository.dart';
+import 'package:blip_chat_app/common/repository/chat_repository.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';
 import 'package:blip_chat_app/splash/bloc/splash_bloc.dart';
 import 'package:blip_chat_app/splash/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +27,7 @@ void main() async {
 
   runApp(MultiRepositoryProvider(providers: [
     RepositoryProvider<AuthRepository>(create: (context) => AuthRepository()),
+    RepositoryProvider<ChatRepository>(create: (context) => ChatRepository()),
   ], child: const MyApp()));
 }
 
@@ -50,6 +54,12 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Inter',
           primarySwatch: Colors.blue,
         ),
+        builder: (context, widget) {
+          return StreamChatCore(
+            client: RepositoryProvider.of<ChatRepository>(context).client,
+            child: widget!,
+          );
+        },
         home: const SplashScreen(),
       ),
     );

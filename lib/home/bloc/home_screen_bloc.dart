@@ -1,27 +1,23 @@
+import 'package:blip_chat_app/calls/calls_screen.dart';
+import 'package:blip_chat_app/channels/channels_screen.dart';
+import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_event.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_state.dart';
+import 'package:blip_chat_app/profile/profile_screen.dart';
+import 'package:blip_chat_app/search/search_screen.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
   int selectedIndex = 0;
-  final List<Widget> _screens = [
-    Container(
-      height: double.infinity,
-      width: double.infinity,
-      child: Text('messages'),
-    ),
-    Container(
-      height: double.infinity,
-      width: double.infinity,
-      child: Text('calls'),
-    ),
-  ];
 
-  getSelectedScreen(int index) {
-    return _screens[index];
-  }
+  final List<Widget> _screens = const <Widget>[
+    ChannelsScreen(),
+    CallsScreen(),
+    SearchScreen(),
+    ProfileScreen(),
+  ];
 
   HomeScreenBloc() : super(InitialHomeState()) {
     on<ChangeScreenBottomNavigationBarEvent>((event, emit) {
@@ -33,5 +29,15 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
             errorMsg: '$e Change Screen Bottom Navigation Bar Event $s');
       }
     });
+  }
+
+  Widget getSelectedScreen() {
+    return _screens[selectedIndex];
+  }
+
+  Color getNavigationBarItemColor({required int itemIndex}) {
+    bool isItemSelected = (selectedIndex == itemIndex);
+
+    return isItemSelected ? ColorConstants.black : ColorConstants.grey;
   }
 }

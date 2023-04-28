@@ -13,8 +13,8 @@
                 "AUTH0_DOMAIN=hasknosiit.us.auth0.com",
                 "--dart-define",
                 "AUTH0_CLIENT_ID=FJm34RXXXA5yRsRFf0E3rZsEZker4Q4E",
-                // "--dart-define",
-                // "STREAM_API_KEY=we6n348smxfb"
+                "--dart-define",
+                "STREAM_API_KEY=r57vy2e7gcsu"
             ]
         },
         {

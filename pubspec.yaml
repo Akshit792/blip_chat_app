@@ -44,6 +44,7 @@ dependencies:
   flutter_appauth: ^4.2.1+1
   flutter_secure_storage: ^8.0.0
   http: ^0.13.5
+  stream_chat_flutter_core: ^6.0.0
   
 
 dev_dependencies:

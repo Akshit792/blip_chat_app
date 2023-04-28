@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:blip_chat_app/common/models/auth0_profile.dart';
 import 'package:blip_chat_app/home/home_screen.dart';
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/helpers.dart';
@@ -17,6 +18,7 @@ class AuthenticationBloc
       try {
         emit(LoadingAuthenticationState());
 
+        var chatRepo = RepositoryProvider.of(event.context);
         var authRepo = RepositoryProvider.of<AuthRepository>(event.context);
         AuthResultType authResultType = await authRepo.loginAction();
 
@@ -26,13 +28,16 @@ class AuthenticationBloc
 
           if (refreshToken != null) {
             LogPrint.info(infoMsg: "refresh token : $refreshToken");
+            Auth0Profile user = authRepo.auth0Profile!;
+
+            await chatRepo.connectedUserToClient(user: user);
 
             Navigator.of(event.context)
                 .pushReplacement(MaterialPageRoute(builder: (context) {
               return const HomeScreen();
             }));
           } else {
-            // show an error dialog
+            // TODO: show an error dialog
           }
         }
         emit(LoadedAuthenticationState());
