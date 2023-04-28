@@ -12,6 +12,7 @@ class Constants {
   static const personIconPlaceholder = "assets/images/person_icon.png";
   static const phoneIconPlaceholder = "assets/images/phone_icon.png";
   static const searchIconPlaceholder = "assets/images/search_icon.png";
+  static const rockEmojiIconPlaceHolder = "assets/images/rock_emoji_icon.png";
 
   static const STREAM_API_KEY = String.fromEnvironment('STREAM_API_KEY');
   static const AUTH0_DOMAIN = String.fromEnvironment('AUTH0_DOMAIN');

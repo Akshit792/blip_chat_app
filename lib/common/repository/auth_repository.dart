@@ -14,8 +14,12 @@ class AuthRepository {
   final FlutterAppAuth _appAuth = const FlutterAppAuth();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
+  bool isThisNewUser = false;
+
   Future<AuthResultType> loginAction() async {
     try {
+      isThisNewUser = true;
+
       AuthorizationTokenRequest tokenRequest = AuthorizationTokenRequest(
           Constants.AUTH0_CLIENT_ID, Constants.Auth0_REDIRECT_URL,
           issuer: Constants.AUTH0_ISSUER,
@@ -44,6 +48,8 @@ class AuthRepository {
 
   Future<AuthResultType> revalidateUser() async {
     try {
+      isThisNewUser = false;
+
       var secureRefreshToken =
           await _secureStorage.read(key: Constants.refreshTokenKey);
 

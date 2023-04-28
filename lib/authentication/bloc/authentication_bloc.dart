@@ -46,4 +46,11 @@ class AuthenticationBloc
       }
     });
   }
+
+  Auth0Profile? getCurrentUser({required BuildContext context}) {
+    AuthRepository authRepo = RepositoryProvider.of<AuthRepository>(context);
+    Auth0Profile? currentUser = authRepo.auth0Profile;
+
+    return currentUser;
+  }
 }

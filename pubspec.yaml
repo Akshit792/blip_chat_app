@@ -79,6 +79,7 @@ flutter:
     - assets/images/person_icon.png
     - assets/images/phone_icon.png
     - assets/images/search_icon.png
+    - assets/images/rock_emoji_icon.png
    
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -98,6 +99,8 @@ flutter:
         - asset: assets/fonts/inter/Inter-Regular.ttf
         - asset: assets/fonts/inter/Inter-Bold.ttf
           weight: 700 
+        - asset: assets/fonts/inter/Inter-Light.ttf  
+          weight: 300
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
