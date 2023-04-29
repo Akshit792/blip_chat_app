@@ -5,11 +5,17 @@ class LogPrint {
     Logger().i(infoMsg);
   }
 
-  static warning({required String warningMsg}) {
+  static warning(
+      {required dynamic error,
+      required String warningMsg,
+      required StackTrace stackTrace}) {
     Logger().w(warningMsg);
   }
 
-  static error({required String errorMsg}) {
+  static error(
+      {required dynamic error,
+      required String errorMsg,
+      required StackTrace stackTrace}) {
     Logger().i(errorMsg);
   }
 }

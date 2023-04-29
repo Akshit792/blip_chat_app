@@ -11,3 +11,9 @@ class ChangeScreenBottomNavigationBarEvent extends HomeScreenEvent {
     required this.index,
   });
 }
+
+class InitlizeUserListControllerEvent extends HomeScreenEvent {
+  final BuildContext context;
+
+  InitlizeUserListControllerEvent({required this.context});
+}

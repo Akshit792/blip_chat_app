@@ -41,7 +41,11 @@ class AuthRepository {
 
       return resultType;
     } catch (e, s) {
-      LogPrint.error(errorMsg: "$e ${e.runtimeType} Auth0 Login Action $s");
+      LogPrint.error(
+        errorMsg: "Auth0 Login Action",
+        error: e,
+        stackTrace: s,
+      );
       return AuthResultType.error;
     }
   }
@@ -73,7 +77,11 @@ class AuthRepository {
       return result;
     } catch (e, s) {
       LogPrint.info(infoMsg: "Token Revalidation Failed");
-      LogPrint.error(errorMsg: "$e ${e.runtimeType} Revalidate User $s");
+      LogPrint.error(
+        errorMsg: "Revalidate User",
+        error: e,
+        stackTrace: s,
+      );
       return AuthResultType.error;
     }
   }
@@ -127,7 +135,11 @@ class AuthRepository {
 
       return true;
     } catch (e, s) {
-      LogPrint.error(errorMsg: '$e ${e.runtimeType} Get User Details $s');
+      LogPrint.error(
+        errorMsg: 'Get User Details',
+        error: e,
+        stackTrace: s,
+      );
       return false;
     }
   }
@@ -137,6 +149,17 @@ class AuthRepository {
         authorizationTokenResponse.idToken != null &&
         authorizationTokenResponse.accessToken != null &&
         authorizationTokenResponse.refreshToken != null);
+  }
+
+  Future<void> authEndSession() async {
+    // EndSessionRequest endSessionRequest = EndSessionRequest(
+    //   postLogoutRedirectUrl: Constants.Auth0_LOGOUT_URL,
+    //   issuer: Constants.AUTH0_ISSUER,
+    // );
+
+    // await _appAuth.endSession(endSessionRequest);
+    await _secureStorage.delete(key: Constants.accessTokenKey);
+    await _secureStorage.delete(key: Constants.refreshTokenKey);
   }
 }
 

@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:blip_chat_app/common/models/auth0_profile.dart';
+import 'package:blip_chat_app/common/repository/chat_repository.dart';
 import 'package:blip_chat_app/home/home_screen.dart';
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/helpers.dart';
@@ -18,7 +19,7 @@ class AuthenticationBloc
       try {
         emit(LoadingAuthenticationState());
 
-        var chatRepo = RepositoryProvider.of(event.context);
+        var chatRepo = RepositoryProvider.of<ChatRepository>(event.context);
         var authRepo = RepositoryProvider.of<AuthRepository>(event.context);
         AuthResultType authResultType = await authRepo.loginAction();
 
@@ -30,7 +31,7 @@ class AuthenticationBloc
             LogPrint.info(infoMsg: "refresh token : $refreshToken");
             Auth0Profile user = authRepo.auth0Profile!;
 
-            await chatRepo.connectedUserToClient(user: user);
+            await chatRepo.connectUserToClient(user: user);
 
             Navigator.of(event.context)
                 .pushReplacement(MaterialPageRoute(builder: (context) {
@@ -41,8 +42,9 @@ class AuthenticationBloc
           }
         }
         emit(LoadedAuthenticationState());
-      } catch (e, s) {
-        LogPrint.error(errorMsg: "$e Authentication Login Event $s");
+      } on Exception catch (e, s) {
+        LogPrint.error(
+            errorMsg: "Authentication Login Event", error: e, stackTrace: s);
       }
     });
   }

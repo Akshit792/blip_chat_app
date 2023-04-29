@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:blip_chat_app/authentication/bloc/authentication_bloc.dart';
 import 'package:blip_chat_app/channels/bloc/channels_bloc.dart';
-import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/repository/auth_repository.dart';
 import 'package:blip_chat_app/common/repository/chat_repository.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';

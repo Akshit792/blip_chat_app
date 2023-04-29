@@ -39,7 +39,10 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         emit(AuthStatusLoadedSplashState());
       } catch (e, s) {
         LogPrint.error(
-            errorMsg: "$e ${e.runtimeType} Check Token Splash State $s");
+          errorMsg: "Check Token Splash State",
+          error: e,
+          stackTrace: s,
+        );
       }
     });
   }
