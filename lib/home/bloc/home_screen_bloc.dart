@@ -35,21 +35,6 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         );
       }
     });
-    on<InitlizeUserListControllerEvent>((event, emit) async {
-      try {
-        var chatRepo = RepositoryProvider.of<ChatRepository>(event.context);
-
-        userListController =
-            chatRepo.getStreamUserListController(context: event.context);
-        await userListController!.doInitialLoad();
-      } on Exception catch (e, s) {
-        LogPrint.error(
-          error: e,
-          errorMsg: 'Initlize User List Controller Event',
-          stackTrace: s,
-        );
-      }
-    });
   }
 
   Widget getSelectedScreen() {
@@ -60,11 +45,5 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     bool isItemSelected = (selectedIndex == itemIndex);
 
     return isItemSelected ? ColorConstants.black : ColorConstants.grey;
-  }
-
-  disposeUserListController() {
-    if (userListController != null) {
-      userListController!.dispose();
-    }
   }
 }

@@ -1,11 +1,10 @@
 import 'package:blip_chat_app/common/constants.dart';
-import 'package:blip_chat_app/common/repository/chat_repository.dart';
+import 'package:blip_chat_app/common/repository/user_list_widget.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_event.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -44,7 +43,7 @@ class HomeScreen extends StatelessWidget {
               iconImage: Constants.phoneIconPlaceholder,
               label: 'Calls',
               itemIndex: 1),
-          _showMembersButton(context: context),
+          _showUsersButton(context: context),
           _buildBottomNavigationBarItem(
               context: context,
               iconImage: Constants.searchIconPlaceholder,
@@ -92,12 +91,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _showMembersButton({required BuildContext context}) {
+  Widget _showUsersButton({required BuildContext context}) {
     return InkWell(
       borderRadius: BorderRadius.circular(50),
       splashColor: Colors.white.withOpacity(0.6),
       onTap: () {
-        _showSelectMembersDialog(context: context);
+        _showSelectUsersDialog(context: context);
       },
       child: Ink(
         height: 50,
@@ -122,8 +121,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _showSelectMembersDialog({required BuildContext context}) {
-    bool isLoading = true;
+  void _showSelectUsersDialog({required BuildContext context}) {
     showDialog(
         context: context,
         builder: (context) {
@@ -131,21 +129,6 @@ class HomeScreen extends StatelessWidget {
           var dialogWidth = MediaQuery.of(context).size.width * 0.7;
 
           return StatefulBuilder(builder: (context, changeState) {
-            StreamUserListController userListController;
-            var chatRepo = RepositoryProvider.of<ChatRepository>(context);
-
-            userListController =
-                chatRepo.getStreamUserListController(context: context);
-
-            if (isLoading) {
-              userListController.doInitialLoad().then((value) {
-                changeState(() {
-                  isLoading = false;
-                  print('hey there');
-                });
-              });
-            }
-
             return AlertDialog(
               insetPadding: const EdgeInsets.all(0),
               shape: RoundedRectangleBorder(
@@ -153,21 +136,22 @@ class HomeScreen extends StatelessWidget {
               content: SizedBox(
                 height: dialogHeight,
                 width: dialogWidth,
-                child: isLoading
-                    ? CircularProgressIndicator()
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: const [
-                          Text(
-                            'Select Member',
-                            style: TextStyle(
-                              color: ColorConstants.grey,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                            ),
-                          )
-                        ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: const [
+                    Text(
+                      'Select Member',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
                       ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    UsersListWidget(),
+                  ],
+                ),
               ),
             );
           });

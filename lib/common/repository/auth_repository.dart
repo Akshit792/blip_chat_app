@@ -21,17 +21,17 @@ class AuthRepository {
       isThisNewUser = true;
 
       AuthorizationTokenRequest tokenRequest = AuthorizationTokenRequest(
-          Constants.AUTH0_CLIENT_ID, Constants.Auth0_REDIRECT_URL,
-          issuer: Constants.AUTH0_ISSUER,
-          scopes: [
-            'openid',
-            'profile',
-            'email',
-            'offline_access',
-          ],
-          promptValues: [
-            'login'
-          ]);
+        Constants.AUTH0_CLIENT_ID,
+        Constants.Auth0_REDIRECT_URL,
+        issuer: Constants.AUTH0_ISSUER,
+        scopes: [
+          'openid',
+          'profile',
+          'email',
+          'offline_access',
+        ],
+        promptValues: ['login'],
+      );
 
       AuthorizationTokenResponse? authorizationTokenResponse =
           await _appAuth.authorizeAndExchangeCode(tokenRequest);

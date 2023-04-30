@@ -15,7 +15,7 @@ class ChatRepository {
 
     OwnUser connectedUser = await client.connectUser(
         User(id: user.userId, extraData: {
-          'name': user.name,
+          'name': user.nickName,
           'email': user.email,
           'image': user.picture,
         }),
@@ -44,16 +44,23 @@ class ChatRepository {
       client: client,
       filter: filters,
       channelStateSort: channelSort,
+      limit: 20,
     );
     return streamChannelListController;
   }
 
   StreamUserListController getStreamUserListController(
       {required BuildContext context}) {
+    var client = StreamChatCore.of(context).client;
+    Filter filter =
+        Filter.notEqual('id', StreamChatCore.of(context).currentUser!.id);
+
     late final userListController = StreamUserListController(
-      filter: Filer,
-      client: StreamChatCore.of(context).client,
+      filter: filter,
+      client: client,
+      limit: 10,
     );
+
     return userListController;
   }
 
