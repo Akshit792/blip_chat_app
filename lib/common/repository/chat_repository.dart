@@ -1,5 +1,6 @@
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/auth0_profile.dart';
+import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -26,16 +27,16 @@ class ChatRepository {
 
   StreamChannelListController getStreamChannelListController(
       BuildContext context) {
+    // TODO: CHECK THIS
     Filter filters = Filter.and(
       [
-        Filter.equal('type', 'messages'),
+        Filter.equal('type', 'messaging'),
         Filter.in_(
           'members',
           [StreamChatCore.of(context).currentUser!.id],
         )
       ],
     );
-
     List<SortOption<ChannelState>>? channelSort = const [
       SortOption('last_message_at')
     ];
@@ -48,10 +49,10 @@ class ChatRepository {
     );
     return streamChannelListController;
   }
+  //TODO: CLIENT
 
   StreamUserListController getStreamUserListController(
       {required BuildContext context}) {
-    var client = StreamChatCore.of(context).client;
     Filter filter =
         Filter.notEqual('id', StreamChatCore.of(context).currentUser!.id);
 
@@ -62,6 +63,18 @@ class ChatRepository {
     );
 
     return userListController;
+  }
+
+  Future<void> createOneOnOneChatChannel(
+      {required String userId, required BuildContext context}) async {
+    final core = StreamChatCore.of(context);
+    final channel = core.client.channel('messaging', extraData: {
+      'members': [
+        core.currentUser!.id,
+        userId,
+      ]
+    });
+    await channel.watch();
   }
 
   Future<void> disconnectUserFromClient() async {

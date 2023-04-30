@@ -2,6 +2,7 @@
 
 import 'package:blip_chat_app/common/models/auth0_profile.dart';
 import 'package:blip_chat_app/common/repository/chat_repository.dart';
+import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';
 import 'package:blip_chat_app/home/home_screen.dart';
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/helpers.dart';
@@ -21,6 +22,7 @@ class AuthenticationBloc
 
         var chatRepo = RepositoryProvider.of<ChatRepository>(event.context);
         var authRepo = RepositoryProvider.of<AuthRepository>(event.context);
+        var homeScreenBloc = BlocProvider.of<HomeScreenBloc>(event.context);
         AuthResultType authResultType = await authRepo.loginAction();
 
         if (authResultType == AuthResultType.success) {
@@ -32,6 +34,8 @@ class AuthenticationBloc
             Auth0Profile user = authRepo.auth0Profile!;
 
             await chatRepo.connectUserToClient(user: user);
+
+            homeScreenBloc.selectedIndex = 0;
 
             Navigator.of(event.context)
                 .pushReplacement(MaterialPageRoute(builder: (context) {

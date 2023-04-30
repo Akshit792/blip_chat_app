@@ -1,6 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:blip_chat_app/common/repository/chat_repository.dart';
+import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';
+import 'package:blip_chat_app/home/bloc/home_screen_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -47,9 +51,7 @@ class _UsersListWidgetState extends State<UsersListWidget> {
                         }
                         return LazyLoadScrollView(
                           onEndOfPage: () async {
-                            if (nextPageKey != null) {
-                              _userListController.loadMore(nextPageKey);
-                            }
+                            _loadMoreUsers(nextPageKey: nextPageKey);
                           },
                           child: ListView.builder(
                             itemCount: (nextPageKey != null || error != null)
@@ -90,6 +92,7 @@ class _UsersListWidgetState extends State<UsersListWidget> {
   Widget _buildUserDetailsTile({required User userData}) {
     return ListTile(
       onTap: () async {
+        _createChannel(userId: userData.id);
         Navigator.of(context).pop();
       },
       leading: Container(
@@ -149,5 +152,26 @@ class _UsersListWidgetState extends State<UsersListWidget> {
       );
     }
     setState(() {});
+  }
+
+  Future<void> _loadMoreUsers({required int? nextPageKey}) async {
+    if (nextPageKey != null) {
+      _userListController.loadMore(nextPageKey);
+    }
+  }
+
+  Future<void> _createChannel({required String userId}) async {
+    try {
+      var chatRepo = RepositoryProvider.of<ChatRepository>(context);
+
+      await chatRepo.createOneOnOneChatChannel(
+          userId: userId, context: context);
+
+      BlocProvider.of<HomeScreenBloc>(context).add(
+          ChangeScreenBottomNavigationBarEvent(context: context, index: 0));
+    } on Exception catch (e, s) {
+      LogPrint.error(
+          error: e, errorMsg: 'Create Channel User List Page', stackTrace: s);
+    }
   }
 }
