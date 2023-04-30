@@ -1,5 +1,5 @@
 import 'package:blip_chat_app/common/constants.dart';
-import 'package:blip_chat_app/common/repository/user_list_widget.dart';
+import 'package:blip_chat_app/common/widgets/user_list_widget.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_event.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_state.dart';
