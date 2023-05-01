@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:blip_chat_app/common/repository/chat_repository.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';
@@ -90,25 +89,37 @@ class _UsersListWidgetState extends State<UsersListWidget> {
 
 //TODO: USE CACHE NETWORK IMAGE
   Widget _buildUserDetailsTile({required User userData}) {
-    return ListTile(
-      onTap: () async {
-        _createChannel(userId: userData.id);
-        Navigator.of(context).pop();
-      },
-      leading: Container(
-        height: 50,
-        width: 50,
-        decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            image: DecorationImage(image: NetworkImage(userData.image ?? ""))),
-      ),
-      title: Text(
-        userData.name,
-        style: const TextStyle(
-          color: ColorConstants.grey,
-          fontWeight: FontWeight.w500,
+    return Column(
+      children: [
+        ListTile(
+          onTap: () async {
+            _createChannel(userId: userData.id);
+            Navigator.of(context).pop();
+          },
+          leading: Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image:
+                    DecorationImage(image: NetworkImage(userData.image ?? ""))),
+          ),
+          title: Text(
+            userData.name,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
+          ),
         ),
-      ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          child: Container(
+            height: 1,
+            color: Colors.grey[300],
+          ),
+        ),
+      ],
     );
   }
 

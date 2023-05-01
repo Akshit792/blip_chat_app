@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:blip_chat_app/authentication/authentication_screen.dart';
+import 'package:blip_chat_app/channels/bloc/channels_bloc.dart';
 import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:blip_chat_app/common/repository/auth_repository.dart';
 import 'package:blip_chat_app/common/repository/chat_repository.dart';
@@ -21,11 +22,14 @@ class ProfileScreen extends StatelessWidget {
               await RepositoryProvider.of<ChatRepository>(context)
                   .disconnectUserFromClient();
 
-              Navigator.of(context)
-                  .pushReplacement(MaterialPageRoute(builder: (context) {
-                return AuthenticationScreen();
-              }));
-
+              Navigator.of(context).pushAndRemoveUntil<void>(
+                MaterialPageRoute<void>(
+                    builder: (BuildContext context) =>
+                        const AuthenticationScreen()),
+                ModalRoute.withName('/'),
+              );
+              BlocProvider.of<ChannelsBloc>(context)
+                  .disposeChannelListController(context: context);
               // dispose the controller
             } on Exception catch (e, s) {
               LogPrint.error(

@@ -2,7 +2,6 @@ import 'package:blip_chat_app/calls/calls_screen.dart';
 import 'package:blip_chat_app/channels/channels_screen.dart';
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/logger.dart';
-import 'package:blip_chat_app/common/repository/chat_repository.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_event.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_state.dart';
 import 'package:blip_chat_app/profile/profile_screen.dart';

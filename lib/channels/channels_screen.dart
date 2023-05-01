@@ -3,7 +3,6 @@ import 'package:blip_chat_app/channels/bloc/channels_bloc.dart';
 import 'package:blip_chat_app/channels/bloc/channels_event.dart';
 import 'package:blip_chat_app/channels/bloc/channels_state.dart';
 import 'package:blip_chat_app/common/constants.dart';
-import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -66,134 +65,195 @@ class ChannelsScreen extends StatelessWidget {
   }
 
   Widget _buildChannelsList() {
+    bool isChannelListControllerInitilized = false;
+
     return BlocBuilder<ChannelsBloc, ChannelsState>(
       builder: (context, state) {
         var channelsBloc = BlocProvider.of<ChannelsBloc>(context);
-        StreamChannelListController? streamChannelListController;
 
-        if (state is InitialChannelState) {
+        if (state is InitialChannelState ||
+            (!isChannelListControllerInitilized)) {
           channelsBloc
               .add(InitilizeChannelListControllerEvent(context: context));
+          isChannelListControllerInitilized = true;
         }
-        if (state is LoadedChannelState) {
-          streamChannelListController =
-              channelsBloc.streamChannelListController!;
-          print(streamChannelListController.filter);
-        }
+        if (state is LoadedChannelState) {}
 
         return Expanded(
           child: Container(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-              color: Colors.white,
-            ),
-            child: (state is LoadedChannelState)
-                ? PagedValueListenableBuilder<int, Channel>(
-                    valueListenable: streamChannelListController!,
-                    builder: (context, value, child) {
-                      return value.when(
-                        (channels, nextPageKey, error) {
-                          if (channels.isEmpty) {
-                            return const Center(
-                              child: Text('There are no channels.'),
-                            );
-                          }
-                          return LazyLoadScrollView(
-                            onEndOfPage: () async {
-                              if (nextPageKey != null) {
-                                streamChannelListController!
-                                    .loadMore(nextPageKey);
-                              }
-                            },
-                            child: ListView.builder(
-                              itemCount: (nextPageKey != null || error != null)
-                                  ? channels.length + 1
-                                  : channels.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                // when there is error or the list is at the end
-                                if (index == channels.length) {
-                                  if (error != null) {
-                                    return TextButton(
-                                      onPressed: () {
-                                        streamChannelListController!.retry();
-                                      },
-                                      child: Text(error.message),
-                                    );
-                                  }
-                                  return CircularProgressIndicator();
-                                }
-
-                                final Channel channelData = channels[index];
-                                final List<Member> members =
-                                    channelData.state!.members;
-                                final Member otherUser = members.firstWhere(
-                                    (memberData) =>
-                                        memberData.userId !=
-                                        channelData.createdBy!.id);
-
-                                final isThisCurrentUser = (channelData
-                                        .createdBy!.id ==
-                                    StreamChatCore.of(context).currentUser!.id);
-
-                                LogPrint.info(infoMsg: otherUser.toString());
-
-                                return ListTile(
-                                  onTap: () {},
-                                  leading: Container(
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        image: DecorationImage(
-                                            image: NetworkImage(
-                                                isThisCurrentUser
-                                                    ? otherUser.user!.image ??
-                                                        ""
-                                                    : channelData
-                                                            .createdBy!.image ??
-                                                        ""))),
-                                  ),
-                                  title: Text(isThisCurrentUser
-                                      ? otherUser.user!.name
-                                      : channelData.createdBy!.name),
-                                  subtitle: StreamBuilder<Message?>(
-                                    stream:
-                                        channelData.state!.lastMessageStream,
-                                    initialData: channelData.state!.lastMessage,
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasData) {
-                                        return Text(snapshot.data!.text!);
-                                      }
-
-                                      return const SizedBox();
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                        loading: () => const Center(
-                          child: SizedBox(
-                            height: 100,
-                            width: 100,
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                        error: (e) => Center(
-                          child: Text(
-                            'Oh no, something went wrong. '
-                            'Please check your config. $e',
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                : null,
-          ),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30)),
+                color: Colors.grey[100]!,
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 7,
+                    width: 110,
+                    margin: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                  if (state is LoadedChannelState)
+                    _pageValueListenableBuilder(
+                        streamChannelListController:
+                            channelsBloc.streamChannelListController!)
+                ],
+              )),
         );
       },
+    );
+  }
+
+  Widget _pageValueListenableBuilder(
+      {required StreamChannelListController? streamChannelListController}) {
+    return Expanded(
+      child: PagedValueListenableBuilder<int, Channel>(
+        valueListenable: streamChannelListController!,
+        builder: (context, value, child) {
+          return value.when((channels, nextPageKey, error) {
+            if (channels.isEmpty) {
+              return _showMessageWidget(message: 'There are no channels.');
+            }
+
+            return LazyLoadScrollView(
+              onEndOfPage: () async {
+                if (nextPageKey != null) {
+                  // todo.
+                  streamChannelListController.loadMore(nextPageKey);
+                }
+              },
+              child: ListView.builder(
+                itemCount: (nextPageKey != null || error != null)
+                    ? channels.length + 1
+                    : channels.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == channels.length) {
+                    if (error != null) {
+                      return TextButton(
+                        onPressed: () {
+                          // TODO: SAPRATE THE LOGIC
+                          streamChannelListController.retry();
+                        },
+                        child: Text(error.message),
+                      );
+                    }
+                    return const CircularProgressIndicator.adaptive(
+                      strokeWidth: 2.5,
+                    );
+                  }
+
+                  final Channel channelData = channels[index];
+                  final List<Member> members = channelData.state!.members;
+                  final Member otherUser = members.firstWhere((memberData) =>
+                      memberData.userId != channelData.createdBy!.id);
+
+                  final isThisCurrentUser = (channelData.createdBy!.id ==
+                      StreamChatCore.of(context).currentUser!.id);
+
+                  return _buildChannelItemListTile(
+                    isThisCurrentUser: isThisCurrentUser,
+                    channelData: channelData,
+                    otherUser: otherUser,
+                  );
+                },
+              ),
+            );
+          },
+              loading: () => _circularLoadingInidicator(),
+              error: (e) =>
+                  _showMessageWidget(message: 'Oh no, something went wrong.'));
+        },
+      ),
+    );
+  }
+
+  Widget _buildChannelItemListTile({
+    required bool isThisCurrentUser,
+    required Channel channelData,
+    required Member otherUser,
+  }) {
+    return Column(
+      children: [
+        Material(
+          child: Ink(
+            color: Colors.grey[100],
+            child: ListTile(
+              onTap: () {},
+              leading: Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        image: NetworkImage(isThisCurrentUser
+                            ? otherUser.user!.image ?? ""
+                            : channelData.createdBy!.image ?? ""))),
+              ),
+              title: Text(
+                isThisCurrentUser
+                    ? otherUser.user!.name
+                    : channelData.createdBy!.name,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: StreamBuilder<Message?>(
+                  stream: channelData.state!.lastMessageStream,
+                  initialData: channelData.state!.lastMessage,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Text(snapshot.data!.text!);
+                    }
+
+                    return const Text(
+                      'No messages yet...',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          child: Container(
+            height: 1,
+            color: Colors.grey[300],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _circularLoadingInidicator() {
+    return const Expanded(
+      child: Center(
+          child: SizedBox(
+        height: 30,
+        width: 30,
+        child: CircularProgressIndicator.adaptive(
+          strokeWidth: 2.5,
+        ),
+      )),
+    );
+  }
+
+  Widget _showMessageWidget({required String message}) {
+    return Center(
+      child: Text(message),
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/auth0_profile.dart';
-import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -27,13 +26,14 @@ class ChatRepository {
 
   StreamChannelListController getStreamChannelListController(
       BuildContext context) {
-    // TODO: CHECK THIS
+    var currentUserId = StreamChatCore.of(context).currentUser!.id;
+
     Filter filters = Filter.and(
       [
         Filter.equal('type', 'messaging'),
         Filter.in_(
           'members',
-          [StreamChatCore.of(context).currentUser!.id],
+          [currentUserId],
         )
       ],
     );
@@ -49,7 +49,6 @@ class ChatRepository {
     );
     return streamChannelListController;
   }
-  //TODO: CLIENT
 
   StreamUserListController getStreamUserListController(
       {required BuildContext context}) {

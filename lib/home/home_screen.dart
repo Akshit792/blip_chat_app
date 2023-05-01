@@ -29,7 +29,7 @@ class HomeScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(top: 20, bottom: 40),
       decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey[300]!))),
+          border: Border(top: BorderSide(color: Colors.grey[100]!))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
