@@ -3,6 +3,7 @@ import 'package:blip_chat_app/channels/bloc/channels_bloc.dart';
 import 'package:blip_chat_app/channels/bloc/channels_event.dart';
 import 'package:blip_chat_app/channels/bloc/channels_state.dart';
 import 'package:blip_chat_app/common/constants.dart';
+import 'package:blip_chat_app/messages/messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -157,6 +158,7 @@ class ChannelsScreen extends StatelessWidget {
                       StreamChatCore.of(context).currentUser!.id);
 
                   return _buildChannelItemListTile(
+                    context: context,
                     isThisCurrentUser: isThisCurrentUser,
                     channelData: channelData,
                     otherUser: otherUser,
@@ -174,6 +176,7 @@ class ChannelsScreen extends StatelessWidget {
   }
 
   Widget _buildChannelItemListTile({
+    required BuildContext context,
     required bool isThisCurrentUser,
     required Channel channelData,
     required Member otherUser,
@@ -184,7 +187,15 @@ class ChannelsScreen extends StatelessWidget {
           child: Ink(
             color: Colors.grey[100],
             child: ListTile(
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) {
+                      return const MessagesScreen();
+                    },
+                    settings: RouteSettings(arguments: {
+                      'channel_data': channelData,
+                    })));
+              },
               leading: Container(
                 height: 60,
                 width: 60,
