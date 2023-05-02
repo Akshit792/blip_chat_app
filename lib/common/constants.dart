@@ -13,6 +13,7 @@ class Constants {
   static const phoneIconPlaceholder = "assets/images/phone_icon.png";
   static const searchIconPlaceholder = "assets/images/search_icon.png";
   static const rockEmojiIconPlaceHolder = "assets/images/rock_emoji_icon.png";
+  static const micIconPlaceholder = "assets/images/mic_icon.png";
 
   static const STREAM_API_KEY = String.fromEnvironment('STREAM_API_KEY');
   static const AUTH0_DOMAIN = String.fromEnvironment('AUTH0_DOMAIN');
@@ -31,4 +32,6 @@ class ColorConstants {
   static const grey = Color(0xFF8A91A8);
   static const black = Color(0xFF000000);
   static const yellow = Color(0xFFFFCB45);
+  static const lightYellow = Color.fromRGBO(255, 199, 0, 0.25);
+  static const lightOrange = Color.fromRGBO(255, 137, 51, 0.25);
 }
