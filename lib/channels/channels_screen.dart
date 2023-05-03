@@ -1,8 +1,8 @@
-import 'package:blip_chat_app/authentication/bloc/authentication_bloc.dart';
 import 'package:blip_chat_app/channels/bloc/channels_bloc.dart';
 import 'package:blip_chat_app/channels/bloc/channels_event.dart';
 import 'package:blip_chat_app/channels/bloc/channels_state.dart';
 import 'package:blip_chat_app/common/constants.dart';
+import 'package:blip_chat_app/common/helpers.dart';
 import 'package:blip_chat_app/messages/messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,36 +20,37 @@ class ChannelsScreen extends StatelessWidget {
       child: Column(
         children: [
           _buildWelcomeUserWidget(context: context),
-          _buildChannelsList()
+          _buildChannelsList(),
         ],
       ),
     );
   }
 
   Widget _buildWelcomeUserWidget({required BuildContext context}) {
-    var currentUser = BlocProvider.of<AuthenticationBloc>(context)
-        .getCurrentUser(context: context);
+    var currentUser = Helpers.getCurrentUser(context: context);
 
     return Padding(
-      padding: const EdgeInsets.only(left: 20, top: 45, bottom: 140),
+      padding: const EdgeInsets.only(left: 20, top: 45, right: 20, bottom: 140),
       child: Row(
         children: [
-          RichText(
-            text: TextSpan(
-              children: <TextSpan>[
-                const TextSpan(
-                    text: 'Welcome Back, ',
-                    style: TextStyle(
-                      fontSize: 21,
-                      fontWeight: FontWeight.w300,
-                    )),
-                TextSpan(
-                    text: currentUser != null ? currentUser.nickName : "",
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                    ))
-              ],
+          Flexible(
+            child: RichText(
+              text: TextSpan(
+                children: <TextSpan>[
+                  const TextSpan(
+                      text: 'Welcome Back, ',
+                      style: TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w300,
+                      )),
+                  TextSpan(
+                      text: (currentUser != null) ? (currentUser.name) : "",
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                      ))
+                ],
+              ),
             ),
           ),
           const SizedBox(
@@ -76,8 +77,10 @@ class ChannelsScreen extends StatelessWidget {
             (!isChannelListControllerInitilized)) {
           channelsBloc
               .add(InitilizeChannelListControllerEvent(context: context));
+
           isChannelListControllerInitilized = true;
         }
+
         if (state is LoadedChannelState) {}
 
         return Expanded(
@@ -91,15 +94,7 @@ class ChannelsScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Container(
-                    height: 7,
-                    width: 110,
-                    margin: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.grey[300],
-                    ),
-                  ),
+                  _buildTopDivider(),
                   if (state is LoadedChannelState)
                     _pageValueListenableBuilder(
                         streamChannelListController:
@@ -112,20 +107,19 @@ class ChannelsScreen extends StatelessWidget {
   }
 
   Widget _pageValueListenableBuilder(
-      {required StreamChannelListController? streamChannelListController}) {
+      {required StreamChannelListController streamChannelListController}) {
     return Expanded(
       child: PagedValueListenableBuilder<int, Channel>(
-        valueListenable: streamChannelListController!,
+        valueListenable: streamChannelListController,
         builder: (context, value, child) {
           return value.when((channels, nextPageKey, error) {
             if (channels.isEmpty) {
-              return _showMessageWidget(message: 'There are no channels.');
+              return _showMessageWidget(message: 'There are no Chats...');
             }
 
             return LazyLoadScrollView(
               onEndOfPage: () async {
                 if (nextPageKey != null) {
-                  // todo.
                   streamChannelListController.loadMore(nextPageKey);
                 }
               },
@@ -138,12 +132,12 @@ class ChannelsScreen extends StatelessWidget {
                     if (error != null) {
                       return TextButton(
                         onPressed: () {
-                          // TODO: SAPRATE THE LOGIC
                           streamChannelListController.retry();
                         },
                         child: Text(error.message),
                       );
                     }
+
                     return const CircularProgressIndicator.adaptive(
                       strokeWidth: 2.5,
                     );
@@ -151,17 +145,16 @@ class ChannelsScreen extends StatelessWidget {
 
                   final Channel channelData = channels[index];
                   final List<Member> members = channelData.state!.members;
-                  final Member otherUser = members.firstWhere((memberData) =>
-                      memberData.userId != channelData.createdBy!.id);
+                  final currentUser = Helpers.getCurrentUser(context: context);
 
-                  final isThisCurrentUser = (channelData.createdBy!.id ==
-                      StreamChatCore.of(context).currentUser!.id);
+                  final Member otherUser = members.firstWhere(
+                      (memberData) => memberData.userId != currentUser.id);
 
                   return _buildChannelItemListTile(
                     context: context,
-                    isThisCurrentUser: isThisCurrentUser,
                     channelData: channelData,
                     otherUser: otherUser,
+                    currentUser: currentUser,
                   );
                 },
               ),
@@ -177,8 +170,8 @@ class ChannelsScreen extends StatelessWidget {
 
   Widget _buildChannelItemListTile({
     required BuildContext context,
-    required bool isThisCurrentUser,
     required Channel channelData,
+    required User? currentUser,
     required Member otherUser,
   }) {
     return Column(
@@ -202,18 +195,20 @@ class ChannelsScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                        image: NetworkImage(isThisCurrentUser
-                            ? otherUser.user!.image ?? ""
-                            : channelData.createdBy!.image ?? ""))),
+                        image: NetworkImage(otherUser.user!.image ?? ""))),
               ),
-              title: Text(
-                isThisCurrentUser
-                    ? otherUser.user!.name
-                    : channelData.createdBy!.name,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                ),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    otherUser.user!.name,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  _buildLastMessageAt(channelData: channelData),
+                ],
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 8.0),
@@ -221,13 +216,71 @@ class ChannelsScreen extends StatelessWidget {
                   stream: channelData.state!.lastMessageStream,
                   initialData: channelData.state!.lastMessage,
                   builder: (context, snapshot) {
+                    Message lastMessageData = snapshot.data!;
+
+                    final isThisCurrentUserMessage =
+                        (lastMessageData.user!.id == currentUser!.id);
+
+                    bool isLastMessageReadByCurrentUser =
+                        channelData.state!.read.any((data) =>
+                            (data.lastRead == lastMessageData.createdAt) &&
+                            (data.user.id == currentUser.id));
+
+                    bool isLastMessageReadByOtherUser = channelData.state!.read
+                        .any((data) =>
+                            (data.lastRead == lastMessageData.createdAt) &&
+                            (data.user.id == otherUser.userId));
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Text(
+                        '',
+                        style: TextStyle(
+                          color: ColorConstants.grey,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                        ),
+                      );
+                    }
                     if (snapshot.hasData) {
-                      return Text(snapshot.data!.text!);
+                      return Row(
+                        children: [
+                          // if sent by current user and read by other - double tick
+                          // if sent by current user not read by other - single tick
+                          // if sent by other and not read by current - no tick
+                          // if sent by other and read by current - no tick
+                          if (isThisCurrentUserMessage)
+                            Icon(
+                              (isLastMessageReadByOtherUser)
+                                  ? Icons.done_all
+                                  : Icons.check,
+                              color: ColorConstants.grey,
+                              size: 20,
+                            ),
+                          const SizedBox(width: 10),
+                          Text(
+                            snapshot.data!.text!,
+                            style: TextStyle(
+                              color: (!isThisCurrentUserMessage)
+                                  ? (!isLastMessageReadByCurrentUser)
+                                      ? ColorConstants.black
+                                      : Colors.grey
+                                  : Colors.grey,
+                              fontWeight: (!isThisCurrentUserMessage)
+                                  ? (!isLastMessageReadByCurrentUser)
+                                      ? FontWeight.w600
+                                      : null
+                                  : null,
+                            ),
+                          ),
+                          //TODO: UNREAD COUNT
+                        ],
+                      );
                     }
 
                     return const Text(
                       'No messages yet...',
                       style: TextStyle(
+                        color: ColorConstants.grey,
                         fontWeight: FontWeight.w500,
                         fontSize: 15,
                       ),
@@ -246,6 +299,40 @@ class ChannelsScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  _buildLastMessageAt({required Channel channelData}) {
+    return StreamBuilder<DateTime?>(
+        stream: channelData.lastMessageAtStream,
+        builder: (context, snapShot) {
+          var lastMessageAt = snapShot.data;
+
+          return SizedBox(
+            width: 70,
+            child: Text(
+              (lastMessageAt == null)
+                  ? ""
+                  : Helpers.getTimeStringFromDateTime(dateTime: snapShot.data!),
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: ColorConstants.grey,
+                fontSize: 15,
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget _buildTopDivider() {
+    return Container(
+      height: 7,
+      width: 110,
+      margin: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.grey[300],
+      ),
     );
   }
 

@@ -79,4 +79,9 @@ class ChatRepository {
   Future<void> disconnectUserFromClient() async {
     await client.disconnectUser(flushChatPersistence: true);
   }
+
+  User? getCurrentUser({required BuildContext context}) {
+    User? currentUser = StreamChatCore.of(context).currentUser;
+    return currentUser;
+  }
 }

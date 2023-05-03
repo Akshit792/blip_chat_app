@@ -96,7 +96,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         color: ColorConstants.grey,
                         fontWeight: FontWeight.w500,
                       ),
-
                       // suffixIcon: SizedBox(
                       //   width: 50,
                       //   child: Row(
@@ -183,7 +182,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
 //TODO: REVERSE THE LIST
   Widget _buildMessageList({required List<Message> messagesList}) {
     return ListView.builder(
-        itemCount: messagesList.reversed.length,
+        reverse: true,
+        itemCount: messagesList.length,
         itemBuilder: (context, index) {
           var messageData = messagesList[index];
           bool isThisCurrentUser = (messageData.user!.id ==
