@@ -13,6 +13,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   late Channel channel;
   final StreamMessageInputController _streamMessageInputController =
       StreamMessageInputController();
+  bool isRead = false;
 
   @override
   void didChangeDependencies() {
@@ -21,6 +22,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
     if (routeData != null && routeData is Map) {
       if (routeData.containsKey('channel_data')) {
         channel = routeData['channel_data'];
+      }
+    }
+
+    if (!isRead) {
+      if (channel.state!.unreadCount > 0) {
+        channel.markRead();
+        isRead = true;
       }
     }
 

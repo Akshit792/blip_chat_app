@@ -15,7 +15,6 @@ class Helpers {
   }
 
   static getTimeStringFromDateTime({required DateTime dateTime}) {
-    print(dateTime);
     final localTimeZone = tz.getLocation('Asia/Kolkata');
 
     var formattedDateTime = tz.TZDateTime.from(dateTime, localTimeZone);

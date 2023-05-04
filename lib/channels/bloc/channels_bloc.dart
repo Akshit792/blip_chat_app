@@ -8,6 +8,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 class ChannelsBloc extends Bloc<ChannelsEvent, ChannelsState> {
   StreamChannelListController? streamChannelListController;
+  bool? isChannelListControllerInitilized;
 
   ChannelsBloc() : super(InitialChannelState()) {
     on<InitilizeChannelListControllerEvent>((event, emit) async {
@@ -18,7 +19,7 @@ class ChannelsBloc extends Bloc<ChannelsEvent, ChannelsState> {
             chatRepo.getStreamChannelListController(event.context);
 
         await streamChannelListController!.doInitialLoad();
-
+        isChannelListControllerInitilized = true;
         emit(LoadedChannelState());
       } on Exception catch (e, s) {
         emit(ErrorChannelState());

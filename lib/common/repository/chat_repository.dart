@@ -41,12 +41,13 @@ class ChatRepository {
       SortOption('last_message_at')
     ];
 
-    var streamChannelListController = StreamChannelListController(
+    final streamChannelListController = StreamChannelListController(
       client: client,
       filter: filters,
       channelStateSort: channelSort,
       limit: 20,
     );
+
     return streamChannelListController;
   }
 

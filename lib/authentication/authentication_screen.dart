@@ -19,15 +19,16 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, state) {
         return Scaffold(
-            body: SizedBox(
-          height: screenHeight,
-          child: Column(
+          body: ListView(
             children: [
               _buildAuthScreenImage(screenHeight),
-              _buildLogoTextAndLoginButton(authState: state)
+              _buildLogoTextAndLoginButton(
+                authState: state,
+                screenHeight: screenHeight,
+              )
             ],
           ),
-        ));
+        );
       },
     );
   }
@@ -41,68 +42,72 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
     );
   }
 
-  Widget _buildLogoTextAndLoginButton(
-      {required AuthenticationState authState}) {
-    return Expanded(
-        child: Container(
-      width: double.infinity,
-      color: Colors.black,
-      padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 50,
-          ),
-          const Text(
-            'Stay connected with your friends and family',
-            style: TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+  Widget _buildLogoTextAndLoginButton({
+    required AuthenticationState authState,
+    dynamic screenHeight,
+  }) {
+    return Container(
+        height: screenHeight * 0.5,
+        width: double.infinity,
+        color: Colors.black,
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 50,
             ),
-          ),
-          const SizedBox(
-            height: 25,
-          ),
-          Row(
-            children: [
-              Image.asset(Constants.securityCheckPlaceHolder),
-              const SizedBox(
-                width: 15,
+            const Text(
+              'Stay connected with your friends and family',
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-              const Text(
-                'Secure, private messaging',
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+            Row(
+              children: [
+                Image.asset(Constants.securityCheckPlaceHolder),
+                const SizedBox(
+                  width: 15,
+                ),
+                const Text(
+                  'Secure, private messaging',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 50,
+            ),
+            MaterialButton(
+              color: Colors.white,
+              minWidth: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50)),
+              onPressed: () {
+                BlocProvider.of<AuthenticationBloc>(context)
+                    .add(AuthenticationLoginEvent(context: context));
+              },
+              child: const Text(
+                'SignIn/SignUp',
                 style: TextStyle(
-                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  fontSize: 16,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(
-            height: 50,
-          ),
-          MaterialButton(
-            color: Colors.white,
-            minWidth: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-            onPressed: () {
-              BlocProvider.of<AuthenticationBloc>(context)
-                  .add(AuthenticationLoginEvent(context: context));
-            },
-            child: const Text(
-              'SignIn/SignUp',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
             ),
-          )
-        ],
-      ),
-    ));
+            const SizedBox(
+              height: 50,
+            ),
+          ],
+        ));
   }
 }

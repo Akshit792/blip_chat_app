@@ -21,7 +21,7 @@ class Constants {
   static const AUTH0_ISSUER = "https://$AUTH0_DOMAIN";
   static const Auth0_BUNDLE_ID = "com.example.blipchatapp";
   static const Auth0_REDIRECT_URL = "$Auth0_BUNDLE_ID://login-callback";
-  static const Auth0_LOGOUT_URL = "$Auth0_BUNDLE_ID://logOUT-callback";
+  static const Auth0_LOGOUT_URL = "$Auth0_BUNDLE_ID://logout-callback";
 
   static const idTokenKey = "id_token";
   static const accessTokenKey = "access_token";
