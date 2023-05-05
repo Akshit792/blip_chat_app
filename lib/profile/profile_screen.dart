@@ -30,6 +30,7 @@ class ProfileScreen extends StatelessWidget {
               );
               BlocProvider.of<ChannelsBloc>(context)
                   .disposeChannelListController(context: context);
+
               // dispose the controller
             } on Exception catch (e, s) {
               LogPrint.error(

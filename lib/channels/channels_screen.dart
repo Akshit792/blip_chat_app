@@ -33,8 +33,11 @@ class ChannelsScreen extends StatelessWidget {
       padding: const EdgeInsets.only(left: 20, top: 45, right: 20, bottom: 140),
       child: Row(
         children: [
+          // Intro Text
           Flexible(
             child: RichText(
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               text: TextSpan(
                 children: <TextSpan>[
                   const TextSpan(
@@ -43,6 +46,7 @@ class ChannelsScreen extends StatelessWidget {
                         fontSize: 21,
                         fontWeight: FontWeight.w300,
                       )),
+                  // User Name
                   TextSpan(
                       text: (currentUser != null) ? (currentUser.name) : "",
                       style: const TextStyle(
@@ -56,6 +60,7 @@ class ChannelsScreen extends StatelessWidget {
           const SizedBox(
             width: 10,
           ),
+          // Rock Emoji Icon
           const Image(
             image: AssetImage(Constants.rockEmojiIconPlaceHolder),
             height: 25,
@@ -69,13 +74,16 @@ class ChannelsScreen extends StatelessWidget {
   Widget _buildChannelsList({required BuildContext context}) {
     var channelsBloc = BlocProvider.of<ChannelsBloc>(context);
 
-    channelsBloc.isChannelListControllerInitilized = false;
     return BlocBuilder<ChannelsBloc, ChannelsState>(
       builder: (context, state) {
-        if ((!channelsBloc.isChannelListControllerInitilized!)) {
+        if ((channelsBloc.isChannelListControllerInitilized == null) ||
+            (!channelsBloc.isChannelListControllerInitilized!)) {
           channelsBloc
               .add(InitilizeChannelListControllerEvent(context: context));
         }
+        bool isChannelInitilized =
+            (channelsBloc.isChannelListControllerInitilized != null &&
+                channelsBloc.isChannelListControllerInitilized!);
 
         return Expanded(
           child: Container(
@@ -89,7 +97,8 @@ class ChannelsScreen extends StatelessWidget {
               child: Column(
                 children: [
                   _buildTopDivider(),
-                  if (channelsBloc.isChannelListControllerInitilized!)
+                  // Channel list
+                  if (isChannelInitilized)
                     _pageValueListenableBuilder(
                         streamChannelListController:
                             channelsBloc.streamChannelListController!)
@@ -123,6 +132,8 @@ class ChannelsScreen extends StatelessWidget {
                     ? channels.length + 1
                     : channels.length,
                 itemBuilder: (BuildContext context, int index) {
+                  // at the end of the list show a button to retry in case of error
+                  // or show circular progress indicator if the nextpagekey is not null
                   if (index == channels.length) {
                     if (error != null) {
                       return TextButton(
@@ -176,7 +187,6 @@ class ChannelsScreen extends StatelessWidget {
     required Member otherUser,
   }) {
     User? otherUserDetails = otherUser.user;
-    ChannelClientState? channelDataState = channelData.state;
 
     return Column(
       children: [
@@ -220,94 +230,10 @@ class ChannelsScreen extends StatelessWidget {
               ),
               subtitle: (channelData.state == null)
                   ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: StreamBuilder<Message?>(
-                        stream: channelDataState!.lastMessageStream,
-                        initialData: channelDataState.lastMessage,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                                  ConnectionState.waiting ||
-                              snapshot.hasError) {
-                            return const Text(
-                              'No messages yet...',
-                              style: TextStyle(
-                                color: ColorConstants.grey,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 15,
-                              ),
-                            );
-                          }
-
-                          if (snapshot.hasData) {
-                            Message lastMessageData = snapshot.data!;
-
-                            bool isThisCurrentUserMessage = false;
-
-                            if (lastMessageData.user != null) {
-                              isThisCurrentUserMessage =
-                                  (lastMessageData.user!.id == currentUser.id);
-                            }
-
-                            bool isLastMessageReadByCurrentUser =
-                                channelDataState.read.any((data) =>
-                                    (data.lastRead ==
-                                        lastMessageData.createdAt) &&
-                                    (data.user.id == currentUser.id));
-
-                            bool isLastMessageReadByOtherUser =
-                                channelDataState.read.any((data) =>
-                                    (data.lastRead ==
-                                        lastMessageData.createdAt) &&
-                                    (data.user.id == otherUser.userId));
-
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                if (isThisCurrentUserMessage)
-                                  Icon(
-                                    (isLastMessageReadByOtherUser)
-                                        ? Icons.done_all
-                                        : Icons.check,
-                                    color: ColorConstants.grey,
-                                    size: 20,
-                                  ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    lastMessageData.text ?? "",
-                                    style: TextStyle(
-                                      color: (isThisCurrentUserMessage)
-                                          ? (isLastMessageReadByOtherUser)
-                                              ? ColorConstants.grey
-                                              : ColorConstants.black
-                                          : (isLastMessageReadByCurrentUser)
-                                              ? ColorConstants.grey
-                                              : ColorConstants.black,
-                                      fontWeight: (!isThisCurrentUserMessage)
-                                          ? (!isLastMessageReadByCurrentUser)
-                                              ? FontWeight.w600
-                                              : null
-                                          : null,
-                                    ),
-                                  ),
-                                ),
-                                _buildUnreadCount(
-                                    channelDataState: channelDataState),
-                              ],
-                            );
-                          }
-
-                          return const Text(
-                            'No messages yet...',
-                            style: TextStyle(
-                              color: ColorConstants.grey,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 15,
-                            ),
-                          );
-                        },
-                      ),
+                  : _buildLastMessage(
+                      channel: channelData,
+                      currentUser: currentUser,
+                      otherUser: otherUser,
                     ),
             ),
           ),
@@ -321,6 +247,73 @@ class ChannelsScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  _buildLastMessage({
+    required Channel? channel,
+    required User currentUser,
+    required Member otherUser,
+  }) {
+    ChannelClientState? channelDataState = channel!.state;
+
+    return StreamBuilder<Object>(
+        stream: channelDataState!.unreadCountStream,
+        initialData: channelDataState.unreadCount,
+        builder: (context, snapshot) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: StreamBuilder<Message?>(
+              stream: channelDataState.lastMessageStream,
+              initialData: channelDataState.lastMessage,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    snapshot.hasError) {
+                  return const Text(
+                    'No messages yet...',
+                    style: TextStyle(
+                      color: ColorConstants.grey,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                  );
+                }
+
+                if (snapshot.hasData) {
+                  Message lastMessageData = snapshot.data!;
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          lastMessageData.text ?? "",
+                          style: TextStyle(
+                            color: (channelDataState.unreadCount > 0)
+                                ? ColorConstants.black
+                                : ColorConstants.grey,
+                            fontWeight: (channelDataState.unreadCount > 0)
+                                ? FontWeight.w600
+                                : null,
+                          ),
+                        ),
+                      ),
+                      _buildUnreadCount(channelDataState: channelDataState),
+                    ],
+                  );
+                }
+
+                return const Text(
+                  'No messages yet...',
+                  style: TextStyle(
+                    color: ColorConstants.grey,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
+                  ),
+                );
+              },
+            ),
+          );
+        });
   }
 
   _buildLastMessageAt({required Channel channelData}) {
@@ -353,6 +346,7 @@ class ChannelsScreen extends StatelessWidget {
         builder: (context, snapShot) {
           if (snapShot.hasData) {
             var unreadCount = snapShot.data!;
+
             if (unreadCount > 0) {
               return Container(
                 padding: const EdgeInsets.all(8),

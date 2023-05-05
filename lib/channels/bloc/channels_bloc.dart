@@ -34,6 +34,7 @@ class ChannelsBloc extends Bloc<ChannelsEvent, ChannelsState> {
   disposeChannelListController({required BuildContext context}) {
     if (streamChannelListController != null) {
       streamChannelListController!.dispose();
+      isChannelListControllerInitilized = false;
     }
   }
 }
