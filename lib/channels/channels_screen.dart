@@ -132,8 +132,6 @@ class ChannelsScreen extends StatelessWidget {
                     ? channels.length + 1
                     : channels.length,
                 itemBuilder: (BuildContext context, int index) {
-                  // at the end of the list show a button to retry in case of error
-                  // or show circular progress indicator if the nextpagekey is not null
                   if (index == channels.length) {
                     if (error != null) {
                       return TextButton(
@@ -281,6 +279,9 @@ class ChannelsScreen extends StatelessWidget {
                 if (snapshot.hasData) {
                   Message lastMessageData = snapshot.data!;
 
+                  bool isThisCurrentUserMessage =
+                      (lastMessageData.user!.id == currentUser.id);
+
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -347,23 +348,25 @@ class ChannelsScreen extends StatelessWidget {
           if (snapShot.hasData) {
             var unreadCount = snapShot.data!;
 
-            if (unreadCount > 0) {
-              return Container(
-                padding: const EdgeInsets.all(8),
-                margin: const EdgeInsets.only(left: 10, right: 11),
-                decoration: const BoxDecoration(
-                  color: ColorConstants.yellow,
-                  shape: BoxShape.circle,
+            return Container(
+              padding: const EdgeInsets.all(8),
+              margin: const EdgeInsets.only(left: 10, right: 11),
+              decoration: BoxDecoration(
+                color: (unreadCount > 0)
+                    ? ColorConstants.yellow
+                    : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                (unreadCount > 0)
+                    ? channelDataState.unreadCount.toString()
+                    : '',
+                style: const TextStyle(
+                  color: ColorConstants.black,
+                  fontWeight: FontWeight.w800,
                 ),
-                child: Text(
-                  channelDataState.unreadCount.toString(),
-                  style: const TextStyle(
-                    color: ColorConstants.black,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              );
-            }
+              ),
+            );
           }
           return const SizedBox.shrink();
         });
