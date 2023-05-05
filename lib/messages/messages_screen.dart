@@ -104,25 +104,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         color: ColorConstants.grey,
                         fontWeight: FontWeight.w500,
                       ),
-                      // suffixIcon: SizedBox(
-                      //   width: 50,
-                      //   child: Row(
-                      //     children: [
-                      //       Container(
-                      //           height: 45,
-                      //           width: 45,
-                      //           decoration: const BoxDecoration(
-                      //             shape: BoxShape.circle,
-                      //             color: ColorConstants.yellow,
-                      //           ),
-                      //           child: const Icon(
-                      //             Icons.mic,
-                      //             color: Colors.black,
-                      //             size: 25,
-                      //           ))
-                      //     ],
-                      //   ),
-                      // ),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 25, vertical: 20),
                       border: InputBorder.none,
@@ -187,7 +168,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-//TODO: REVERSE THE LIST
   Widget _buildMessageList({required List<Message> messagesList}) {
     return ListView.builder(
         reverse: true,
@@ -199,8 +179,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
           return Row(
             mainAxisAlignment: isThisCurrentUser
-                ? MainAxisAlignment.start
-                : MainAxisAlignment.end,
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             children: [
               Container(
                 width: 200,

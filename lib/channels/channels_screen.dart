@@ -279,9 +279,6 @@ class ChannelsScreen extends StatelessWidget {
                 if (snapshot.hasData) {
                   Message lastMessageData = snapshot.data!;
 
-                  bool isThisCurrentUserMessage =
-                      (lastMessageData.user!.id == currentUser.id);
-
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
