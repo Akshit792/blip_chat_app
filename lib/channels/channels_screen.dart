@@ -3,6 +3,7 @@ import 'package:blip_chat_app/channels/bloc/channels_event.dart';
 import 'package:blip_chat_app/channels/bloc/channels_state.dart';
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/helpers.dart';
+import 'package:blip_chat_app/common/widgets/avatar_image_widget.dart';
 import 'package:blip_chat_app/messages/messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -203,16 +204,7 @@ class ChannelsScreen extends StatelessWidget {
                     },
                     settings: RouteSettings(arguments: arguments)));
               },
-              leading: Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                        image: NetworkImage(otherUserDetails == null
-                            ? ""
-                            : otherUserDetails.image ?? ""))),
-              ),
+              leading: AvatarImageWidget(userDetails: otherUserDetails),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

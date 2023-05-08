@@ -29,4 +29,20 @@ class Helpers {
         .getCurrentUser(context: context);
     return currentUser;
   }
+
+  static getChannelOtherUser(
+      {required List<Member>? channelMembersList,
+      required BuildContext context}) {
+    Member? otherUser;
+    User? currentUser = getCurrentUser(context: context);
+
+    if (channelMembersList!.isNotEmpty && channelMembersList.length == 2) {
+      for (var memberData in channelMembersList) {
+        if (memberData.userId != currentUser!.id) {
+          otherUser = memberData;
+          return otherUser;
+        }
+      }
+    }
+  }
 }
