@@ -53,7 +53,7 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
-        manifestPlaceholders += ['appAuthRedirectScheme': 'com.example.booksella']
+        manifestPlaceholders += ['appAuthRedirectScheme': 'com.example.blipchatapp']
     }
 
     buildTypes {

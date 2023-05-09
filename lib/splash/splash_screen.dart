@@ -1,3 +1,4 @@
+import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/splash/bloc/splash_bloc.dart';
 import 'package:blip_chat_app/splash/bloc/splash_event.dart';
 import 'package:blip_chat_app/splash/bloc/splash_state.dart';
@@ -17,7 +18,7 @@ class SplashScreen extends StatelessWidget {
               color: const Color.fromRGBO(255, 203, 65, 1),
               borderRadius: BorderRadius.circular(15)),
           child: const Text(
-            'Blip',
+            ('Blip'),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 60,
@@ -42,9 +43,10 @@ class SplashScreen extends StatelessWidget {
                       child: SizedBox(
                         height: 25,
                         width: 25,
-                        child: CircularProgressIndicator(
-                          color: Colors.black,
-                          strokeWidth: 2.8,
+                        child: CircularProgressIndicator.adaptive(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              ColorConstants.black),
+                          strokeWidth: 2.5,
                         ),
                       ),
                     ),

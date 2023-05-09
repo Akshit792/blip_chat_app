@@ -205,12 +205,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
                               _streamMessageInputController.message,
                             );
 
-                            // if (isUserOnline) {
-                            //   print(
-                            //       '////////////////////////////////////////////////////////////////dhweudhiwdhiwed wedhuiwhidu duhdiwhewdiwe duhiewd');
-                            //   await channel.markRead();
-                            // }
-
                             _streamMessageInputController.clear();
                             if (mounted) {
                               setState(() {});
@@ -255,23 +249,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
           User? currentUser = Helpers.getCurrentUser(context: context);
 
           bool isThisCurrentUser = (messageData.user!.id == currentUser!.id);
-
-          // bool isThisCurrentUserMessage =
-          //     messageData.user!.id == currentUser.id;
-
-          // bool isMessageRead = false;
-
-          // if (messageData.latestReactions != null) {
-          //   for (var reactionData in messageData.latestReactions!) {
-          //     if (isThisCurrentUserMessage) {
-          //       if (otherUser != null) {
-          //         isMessageRead = (reactionData.user!.id == otherUser.id);
-          //       }
-          //     } else {
-          //       isMessageRead = (reactionData.user!.id == currentUser.id);
-          //     }
-          //   }
-          // }
 
           return SizedBox(
             width: MediaQuery.of(context).size.height * 0.4,
