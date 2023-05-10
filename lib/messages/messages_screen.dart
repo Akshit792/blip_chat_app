@@ -230,6 +230,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     });
   }
 
+//TODO: SHOW THE ATTACHMENTS
   Widget _buildMessageList({
     required List<Message> messagesList,
     required User? otherUser,

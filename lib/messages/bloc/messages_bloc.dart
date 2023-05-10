@@ -43,6 +43,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
 
         if (event.isSourceGallery) {
           final List<XFile> images = await _imagePicker.pickMultiImage();
+          // TODO:
 
           selectedImages.addAll(images);
         } else {
@@ -84,5 +85,9 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     if (unreadCountSubscription != null) {
       unreadCountSubscription!.cancel();
     }
+  }
+
+  void clearSelectedImages() {
+    selectedImages.clear();
   }
 }
