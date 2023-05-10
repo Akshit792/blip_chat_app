@@ -1,9 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/helpers.dart';
 import 'package:blip_chat_app/common/widgets/avatar_image_widget.dart';
+import 'package:blip_chat_app/messages/message_image/message_image_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 class MessagesScreen extends StatefulWidget {
@@ -142,19 +146,24 @@ class _MessagesScreenState extends State<MessagesScreen> {
               alignment: Alignment.center,
               child: Row(
                 children: [
-                  Container(
-                    height: 45,
-                    width: 45,
-                    alignment: Alignment.center,
-                    margin: const EdgeInsets.only(left: 20),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: ColorConstants.yellow,
-                    ),
-                    child: const Icon(
-                      Icons.add,
-                      color: ColorConstants.black,
-                      size: 30,
+                  InkWell(
+                    onTap: () {
+                      _buildAddAttachmentsDialogBox();
+                    },
+                    child: Container(
+                      height: 45,
+                      width: 45,
+                      alignment: Alignment.center,
+                      margin: const EdgeInsets.only(left: 20),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: ColorConstants.yellow,
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: ColorConstants.black,
+                        size: 30,
+                      ),
                     ),
                   ),
                   Flexible(
@@ -363,5 +372,87 @@ class _MessagesScreenState extends State<MessagesScreen> {
           }
           return const SizedBox.shrink();
         });
+  }
+
+  _buildAddAttachmentsDialogBox() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSelectAttachmentTypeWidget(
+                  icon: Icons.image,
+                  labelText: 'Select Image',
+                  onTap: () {},
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                _buildSelectAttachmentTypeWidget(
+                  icon: Icons.camera_alt,
+                  labelText: 'Take Image',
+                  onTap: () {
+                    _selectImage();
+                  },
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  _buildSelectAttachmentTypeWidget({
+    required IconData icon,
+    required String labelText,
+    required void Function()? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            height: 55,
+            width: 55,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: ColorConstants.yellow,
+            ),
+            child: Icon(
+              icon,
+            ),
+          ),
+          const SizedBox(
+            width: 20,
+          ),
+          Text(
+            labelText,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  _selectImage() async {
+    print('Hello');
+    XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
+    if (image != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) {
+            return const MessageImageScreen();
+          },
+          settings: RouteSettings(arguments: {
+            'image': image,
+            'channel': channel,
+          }),
+        ),
+      );
+    }
   }
 }

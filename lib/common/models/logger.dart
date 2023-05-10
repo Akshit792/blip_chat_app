@@ -9,13 +9,13 @@ class LogPrint {
       {required dynamic error,
       required String warningMsg,
       required StackTrace stackTrace}) {
-    Logger().w(warningMsg);
+    Logger().w('$warningMsg $error $stackTrace');
   }
 
   static error(
       {required dynamic error,
       required String errorMsg,
       required StackTrace stackTrace}) {
-    Logger().i(errorMsg);
+    Logger().i('$errorMsg $error $stackTrace');
   }
 }
