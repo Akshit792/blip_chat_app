@@ -1,13 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:async';
-
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/helpers.dart';
+import 'package:blip_chat_app/common/models/context_holder.dart';
 import 'package:blip_chat_app/common/widgets/avatar_image_widget.dart';
-import 'package:blip_chat_app/messages/message_image/message_image_screen.dart';
+import 'package:blip_chat_app/messages/bloc/messages_bloc.dart';
+import 'package:blip_chat_app/messages/bloc/messages_event.dart';
+import 'package:blip_chat_app/messages/bloc/messages_state.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 class MessagesScreen extends StatefulWidget {
@@ -18,231 +19,215 @@ class MessagesScreen extends StatefulWidget {
 }
 
 class _MessagesScreenState extends State<MessagesScreen> {
-  late StreamSubscription<int> unreadCountSubscription;
+  final _messageInputController = StreamMessageInputController();
   late Channel channel;
-  final StreamMessageInputController _streamMessageInputController =
-      StreamMessageInputController();
-  bool isRead = false;
+  Member? otherUser;
+  User? otherUserDetails;
+  bool isDataInitilised = false;
   bool isUserOnline = false;
-
-  Future<void> _unreadCountHandler(int count) async {
-    if (count > 0) {
-      await channel.markRead();
-    }
-  }
 
   @override
   void didChangeDependencies() {
-    var routeData = ModalRoute.of(context)!.settings.arguments;
-
-    if (routeData != null && routeData is Map) {
-      if (routeData.containsKey('channel_data')) {
-        channel = routeData['channel_data'];
-      }
-    }
-
-    if (!isRead) {
-      unreadCountSubscription =
-          channel.state!.unreadCountStream.listen(_unreadCountHandler);
-    }
-
+    _initiliseData();
     super.didChangeDependencies();
   }
 
   @override
   void dispose() {
-    unreadCountSubscription.cancel();
+    BlocProvider.of<MessagesBloc>(ContextHolder.currentContext)
+        .cancelUnreadCountStream();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Member? otherUser;
-    User? otherUserDetails;
-
-    if (channel.state != null) {
-      otherUser = Helpers.getChannelOtherUser(
-        channelMembersList: channel.state!.members,
-        context: context,
-      );
-      otherUserDetails = otherUser!.user;
-    }
-
-    return Scaffold(
-      backgroundColor: ColorConstants.black,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 25),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  AvatarImageWidget(userDetails: otherUserDetails),
-                  const SizedBox(
-                    width: 15,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        (otherUserDetails != null) ? otherUserDetails.name : "",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
+    return BlocBuilder<MessagesBloc, MessagesState>(builder: (context, state) {
+      return Scaffold(
+        backgroundColor: ColorConstants.black,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 25),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    AvatarImageWidget(userDetails: otherUserDetails),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          (otherUserDetails != null)
+                              ? otherUserDetails!.name
+                              : "",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                          ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      if (channel.state != null)
-                        _buildMemberStatus(channelState: channel.state!),
-                    ],
-                  )
-                ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30)),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        if (channel.state != null)
+                          _buildMemberStatus(channelState: channel.state!),
+                      ],
+                    )
+                  ],
                 ),
-                child: StreamChannel(
-                  channel: channel,
-                  showLoading: true,
-                  child: MessageListCore(
-                    emptyBuilder: (context) {
-                      return const Center(
-                        child: Text('Nothing here...'),
-                      );
-                    },
-                    loadingBuilder: (context) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    },
-                    messageListBuilder: (context, messagesList) {
-                      return _buildMessageList(
-                          messagesList: messagesList,
-                          otherUser: otherUserDetails);
-                    },
-                    errorBuilder: (context, err) {
-                      return const Center(
-                        child: Text('Oh no, something went wrong.'),
-                      );
-                    },
+              ),
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30)),
                   ),
-                ),
-              ),
-            ),
-            Container(
-              height: 120,
-              color: Colors.white,
-              alignment: Alignment.center,
-              child: Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      _buildAddAttachmentsDialogBox();
-                    },
-                    child: Container(
-                      height: 45,
-                      width: 45,
-                      alignment: Alignment.center,
-                      margin: const EdgeInsets.only(left: 20),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: ColorConstants.yellow,
-                      ),
-                      child: const Icon(
-                        Icons.add,
-                        color: ColorConstants.black,
-                        size: 30,
-                      ),
+                  child: StreamChannel(
+                    channel: channel,
+                    showLoading: true,
+                    child: MessageListCore(
+                      emptyBuilder: (context) {
+                        return const Center(
+                          child: Text(
+                            'Nothing here...',
+                            style: TextStyle(
+                              color: ColorConstants.grey,
+                            ),
+                          ),
+                        );
+                      },
+                      loadingBuilder: (context) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                      messageListBuilder: (context, messagesList) {
+                        return _buildMessageList(
+                            messagesList: messagesList,
+                            otherUser: otherUserDetails);
+                      },
+                      errorBuilder: (context, err) {
+                        return const Center(
+                          child: Text(
+                            'Oh no, something went wrong.',
+                            style: TextStyle(
+                              color: ColorConstants.grey,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  Flexible(
-                      child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: TextFormField(
-                      controller:
-                          _streamMessageInputController.textFieldController,
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      decoration: InputDecoration(
-                        hintText: 'Type Message',
-                        hintStyle: const TextStyle(
-                          color: ColorConstants.grey,
-                          fontWeight: FontWeight.w500,
+                ),
+              ),
+              Container(
+                height: 120,
+                color: Colors.white,
+                alignment: Alignment.center,
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        _buildAddAttachmentsDialogBox();
+                      },
+                      child: Container(
+                        height: 45,
+                        width: 45,
+                        alignment: Alignment.center,
+                        margin: const EdgeInsets.only(left: 20),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: ColorConstants.yellow,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 25, vertical: 20),
-                        border: InputBorder.none,
-                        focusedBorder: OutlineInputBorder(
+                        child: const Icon(
+                          Icons.add,
+                          color: ColorConstants.black,
+                          size: 30,
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                        child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: TextFormField(
+                        controller: _messageInputController.textFieldController,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          hintText: 'Type Message',
+                          hintStyle: const TextStyle(
+                            color: ColorConstants.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 25, vertical: 20),
+                          border: InputBorder.none,
+                          focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: const BorderSide(
+                                color: ColorConstants.grey,
+                                width: 1.4,
+                              )),
+                          enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: const BorderSide(
                               color: ColorConstants.grey,
                               width: 1.4,
-                            )),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: const BorderSide(
-                            color: ColorConstants.grey,
-                            width: 1.4,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  )),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Material(
-                      type: MaterialType.circle,
-                      color: ColorConstants.yellow,
-                      clipBehavior: Clip.hardEdge,
-                      child: InkWell(
-                        onTap: () async {
-                          if (_streamMessageInputController
-                                  .message.text?.isNotEmpty ==
-                              true) {
-                            await channel.sendMessage(
-                              _streamMessageInputController.message,
-                            );
+                    )),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Material(
+                        type: MaterialType.circle,
+                        color: ColorConstants.yellow,
+                        clipBehavior: Clip.hardEdge,
+                        child: InkWell(
+                          onTap: () async {
+                            if (_messageInputController
+                                    .message.text?.isNotEmpty ==
+                                true) {
+                              BlocProvider.of<MessagesBloc>(context)
+                                  .add(SendMessageEvent(
+                                context: context,
+                                message: _messageInputController.message,
+                              ));
 
-                            _streamMessageInputController.clear();
-                            if (mounted) {
-                              setState(() {});
+                              _messageInputController.clear();
                             }
-                          }
-                        },
-                        child: Container(
-                          height: 45,
-                          width: 45,
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.send,
-                            color: Colors.black,
-                            size: 20,
+                          },
+                          child: Container(
+                            height: 45,
+                            width: 45,
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.send,
+                              color: Colors.black,
+                              size: 20,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            )
-          ],
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildMessageList({
@@ -385,7 +370,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 _buildSelectAttachmentTypeWidget(
                   icon: Icons.image,
                   labelText: 'Select Image',
-                  onTap: () {},
+                  onTap: () {
+                    BlocProvider.of<MessagesBloc>(context)
+                        .add(TakeImageMessageEvent(
+                      context: context,
+                      isSourceGallery: true,
+                    ));
+                  },
                 ),
                 const SizedBox(
                   height: 20,
@@ -394,7 +385,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   icon: Icons.camera_alt,
                   labelText: 'Take Image',
                   onTap: () {
-                    _selectImage();
+                    BlocProvider.of<MessagesBloc>(context)
+                        .add(TakeImageMessageEvent(
+                      context: context,
+                      isSourceGallery: false,
+                    ));
                   },
                 ),
               ],
@@ -438,21 +433,28 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-  _selectImage() async {
-    print('Hello');
-    XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
-    if (image != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) {
-            return const MessageImageScreen();
-          },
-          settings: RouteSettings(arguments: {
-            'image': image,
-            'channel': channel,
-          }),
-        ),
-      );
+  void _initiliseData() {
+    if (!isDataInitilised) {
+      var routeData = ModalRoute.of(context)!.settings.arguments;
+
+      if (routeData != null && routeData is Map) {
+        if (routeData.containsKey('channel_data')) {
+          channel = routeData['channel_data'];
+        }
+      }
+
+      BlocProvider.of<MessagesBloc>(context)
+          .add(SetUnReadMessagesAsRead(context: context, channel: channel));
+
+      if (channel.state != null) {
+        otherUser = Helpers.getChannelOtherUser(
+          channelMembersList: channel.state!.members,
+          context: context,
+        );
+        otherUserDetails = otherUser!.user;
+      }
+
+      isDataInitilised = true;
     }
   }
 }

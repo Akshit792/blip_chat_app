@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:blip_chat_app/authentication/bloc/authentication_bloc.dart';
 import 'package:blip_chat_app/channels/bloc/channels_bloc.dart';
+import 'package:blip_chat_app/common/models/context_holder.dart';
 import 'package:blip_chat_app/common/repository/auth_repository.dart';
 import 'package:blip_chat_app/common/repository/chat_repository.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';
+import 'package:blip_chat_app/messages/bloc/messages_bloc.dart';
 import 'package:blip_chat_app/splash/bloc/splash_bloc.dart';
 import 'package:blip_chat_app/splash/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -53,13 +55,18 @@ class MyApp extends StatelessWidget {
         BlocProvider<ChannelsBloc>(
           create: (BuildContext context) => ChannelsBloc(),
         ),
+        BlocProvider<MessagesBloc>(
+          create: (BuildContext context) => MessagesBloc(),
+        ),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           fontFamily: 'Inter',
           primarySwatch: Colors.blue,
         ),
+        navigatorKey: ContextHolder.key,
         builder: (context, widget) {
           return StreamChatCore(
             client: RepositoryProvider.of<ChatRepository>(context).client,
