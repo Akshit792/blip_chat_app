@@ -45,4 +45,11 @@ class Helpers {
       }
     }
   }
+
+  static isStringValid({required String? text}) {
+    if (text != null && text != "") {
+      return true;
+    }
+    return false;
+  }
 }

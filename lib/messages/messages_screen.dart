@@ -7,6 +7,8 @@ import 'package:blip_chat_app/common/widgets/avatar_image_widget.dart';
 import 'package:blip_chat_app/messages/bloc/messages_bloc.dart';
 import 'package:blip_chat_app/messages/bloc/messages_event.dart';
 import 'package:blip_chat_app/messages/bloc/messages_state.dart';
+import 'package:blip_chat_app/view_images/bloc/view_images_bloc.dart';
+import 'package:blip_chat_app/view_images/view_images_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -245,6 +247,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
           bool isThisCurrentUser = (messageData.user!.id == currentUser!.id);
 
+          bool isThereAttachments = (messageData.attachments.isNotEmpty);
+
+          String attachmentType = isThereAttachments
+              ? messageData.attachments.first.type ?? ""
+              : "";
+
           return SizedBox(
             width: MediaQuery.of(context).size.height * 0.4,
             child: Padding(
@@ -266,17 +274,33 @@ class _MessagesScreenState extends State<MessagesScreen> {
                           vertical: 15,
                         ),
                         decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.yellow[200]!,
+                          ),
                           borderRadius: BorderRadius.circular(30),
                           color: isThisCurrentUser
                               ? ColorConstants.lightYellow
                               : ColorConstants.lightOrange,
                         ),
-                        child: Text(
-                          messageData.text!,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (isThereAttachments &&
+                                Helpers.isStringValid(
+                                    text:
+                                        messageData.attachments.first.imageUrl))
+                              _buildAttachmentsWidget(
+                                attachments: messageData.attachments,
+                                attachmentType: attachmentType,
+                              ),
+                            Text(
+                              messageData.text!,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(
@@ -397,6 +421,94 @@ class _MessagesScreenState extends State<MessagesScreen> {
             ),
           );
         });
+  }
+
+  _buildAttachmentsWidget({
+    required List<Attachment> attachments,
+    required String attachmentType,
+  }) {
+    if (attachmentType.trim() == 'image') {
+      return Stack(
+        children: [
+          Container(
+            height: 120,
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: Image(
+                image: NetworkImage(attachments.first.imageUrl!),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(
+            height: 120,
+            width: double.infinity,
+            alignment: Alignment.center,
+            child: LayoutBuilder(builder: (context, constraints) {
+              return Material(
+                color: Colors.grey.withOpacity(0.3),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(80)),
+                child: InkWell(
+                  onTap: () {
+                    List<String> imageUrls = [];
+
+                    for (var attachmentData in attachments) {
+                      if (Helpers.isStringValid(
+                          text: attachmentData.imageUrl)) {
+                        imageUrls.add(attachmentData.imageUrl ?? "");
+                      }
+                    }
+
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return BlocProvider(
+                        create: (BuildContext context) =>
+                            ViewImageBloc(imagesUrl: imageUrls),
+                        child: const ViewImageScreen(),
+                      );
+                    }));
+                  },
+                  child: Container(
+                    height: 40,
+                    width: constraints.maxWidth * 0.75,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(80),
+                      color: ColorConstants.grey.withOpacity(0.65),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.download,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(
+                          width: 7,
+                        ),
+                        Text(
+                          '${attachments.length > 10 ? "10+" : attachments.length}  ${attachments.length > 1 ? "Photos" : "Photo"}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          )
+        ],
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   _buildSelectAttachmentTypeWidget({

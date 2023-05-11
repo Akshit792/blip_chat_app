@@ -124,6 +124,9 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                       ),
                                     ),
                                     maxLines: null,
+                                    onChanged: (val) {
+                                      captionText = val;
+                                    },
                                     decoration: InputDecoration(
                                       hintText: 'Add a caption...',
                                       filled: true,
@@ -165,8 +168,12 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                     child: InkWell(
                                       onTap: () async {
                                         List<Attachment> attachments = [];
+
                                         for (var imagesData in imagesList) {
+                                          print(
+                                              'image path : ${imagesData.path}');
                                           attachments.add(Attachment(
+                                              type: 'image',
                                               file: AttachmentFile(
                                                   size: imagesData.lengthSync(),
                                                   path: imagesData.path)));

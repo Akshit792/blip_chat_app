@@ -43,7 +43,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
 
         if (event.isSourceGallery) {
           final List<XFile> images = await _imagePicker.pickMultiImage();
-          // TODO:
 
           selectedImages.addAll(images);
         } else {
@@ -59,15 +58,19 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
           'selected_images': selectedImages,
         };
 
-        Navigator.of(event.context).push(
-          MaterialPageRoute(
-              builder: (context) {
-                return const MessageImageScreen();
-              },
-              settings: RouteSettings(
-                arguments: arguments,
-              )),
-        );
+        if (selectedImages.isNotEmpty) {
+          Navigator.of(event.context).push(
+            MaterialPageRoute(
+                builder: (context) {
+                  return const MessageImageScreen();
+                },
+                settings: RouteSettings(
+                  arguments: arguments,
+                )),
+          );
+        } else {
+          //TODO: An error dialog
+        }
       } on Exception catch (e, s) {
         LogPrint.error(
             error: e, errorMsg: 'Take Image Message Event', stackTrace: s);
