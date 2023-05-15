@@ -26,6 +26,8 @@ class Constants {
   static const idTokenKey = "id_token";
   static const accessTokenKey = "access_token";
   static const refreshTokenKey = "refresh_token";
+
+  static const String albumName = 'Media';
 }
 
 class ColorConstants {

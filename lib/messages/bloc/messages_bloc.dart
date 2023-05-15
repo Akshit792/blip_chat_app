@@ -1,10 +1,13 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:io';
 
+import 'package:blip_chat_app/common/models/context_holder.dart';
 import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:blip_chat_app/messages/bloc/messages_event.dart';
 import 'package:blip_chat_app/messages/bloc/messages_state.dart';
+import 'package:blip_chat_app/messages/message_image/bloc/message_event_state.dart';
 import 'package:blip_chat_app/messages/message_image/message_image_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -53,20 +56,23 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
           }
         }
 
-        var arguments = {
-          'channel': channel,
-          'selected_images': selectedImages,
-        };
-
         if (selectedImages.isNotEmpty) {
-          Navigator.of(event.context).push(
+          List<File> imagesList =
+              selectedImages.map((imageData) => File(imageData.path)).toList();
+
+          Navigator.of(ContextHolder.currentContext).push(
             MaterialPageRoute(
-                builder: (context) {
-                  return const MessageImageScreen();
-                },
-                settings: RouteSettings(
-                  arguments: arguments,
-                )),
+              builder: (context) {
+                return BlocProvider<MessageImageBloc>(
+                  create: (BuildContext context) => MessageImageBloc(
+                    channel: channel!,
+                    imagesList: imagesList,
+                    selectedImages: selectedImages,
+                  ),
+                  child: const MessageImageScreen(),
+                );
+              },
+            ),
           );
         } else {
           //TODO: An error dialog

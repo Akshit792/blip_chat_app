@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 
 class ViewImageBloc extends Bloc<ViewImageEvent, ViewImageState> {
   final List<String> imagesUrl;
+  String currentImagePath = "";
 
   ViewImageBloc({required this.imagesUrl}) : super(InitialViewImageState()) {
     on((event, emit) {});

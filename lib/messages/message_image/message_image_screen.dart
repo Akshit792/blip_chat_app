@@ -4,6 +4,9 @@ import 'dart:io';
 
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/messages/bloc/messages_bloc.dart';
+import 'package:blip_chat_app/messages/message_image/bloc/message_event_state.dart';
+import 'package:blip_chat_app/messages/message_image/bloc/message_image_bloc.dart';
+import 'package:blip_chat_app/messages/message_image/bloc/message_image_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,103 +23,131 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
   late Channel channel;
   late List<XFile> selectedImages;
   late List<File> imagesList = [];
-  bool isDataInitilised = false;
   int selectedImageIndex = 0;
   String captionText = '';
 
   @override
-  void didChangeDependencies() {
-    _initiliseData();
-
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        clearImages();
-        return true;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.black,
-          leading: IconButton(
-            onPressed: () {
-              clearImages();
-              Navigator.of(context).maybePop();
-            },
-            icon: const Icon(Icons.close),
-          ),
-          actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.crop)),
-            const SizedBox(
-              width: 20,
+    return BlocBuilder<MessageImageBloc, MessageImageState>(
+      builder: (context, state) {
+        var messageImageBloc = BlocProvider.of<MessageImageBloc>(context);
+
+        if (state is InitialMessagesImageState ||
+            state is LoadedCropImageState) {
+          channel = messageImageBloc.channel;
+          imagesList = messageImageBloc.imagesList;
+          selectedImages = messageImageBloc.selectedImages;
+        }
+
+        selectedImageIndex = messageImageBloc.selectedDataIndex;
+
+        return WillPopScope(
+          onWillPop: () async {
+            messageImageBloc.clearImages(context: context);
+            return true;
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              elevation: 0,
+              backgroundColor: ColorConstants.yellow,
+              leading: IconButton(
+                onPressed: () {
+                  messageImageBloc.clearImages(context: context);
+
+                  Navigator.of(context).maybePop();
+                },
+                icon: const Icon(
+                  Icons.close,
+                  color: ColorConstants.black,
+                ),
+              ),
+              actions: [
+                IconButton(
+                    onPressed: () {
+                      messageImageBloc.add(
+                        CropSelectedImageEvent(
+                          context: context,
+                          imageFile: imagesList[selectedImageIndex],
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.crop,
+                      color: ColorConstants.black,
+                    )),
+                const SizedBox(
+                  width: 20,
+                ),
+              ],
             ),
-          ],
-        ),
-        body: Container(
-          height: double.infinity,
-          width: double.infinity,
-          color: ColorConstants.black,
-          padding: const EdgeInsets.symmetric(vertical: 40),
-          child: imagesList.isNotEmpty
-              ? Stack(
-                  children: [
-                    SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.55,
-                        width: double.infinity,
-                        child: Image(
-                            image: FileImage(imagesList[selectedImageIndex]))),
-                    SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Container(
-                            height: 60,
-                            width: double.infinity,
-                            color: Colors.grey.withOpacity(0.15),
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            margin: EdgeInsets.only(
-                                top: MediaQuery.of(context).size.height * 0.54),
-                            child: ListView.builder(
-                                itemCount: imagesList.length,
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (context, index) {
-                                  return InkWell(
-                                    onTap: () {
-                                      selectedImageIndex = index;
-                                      setState(() {});
-                                    },
-                                    child: Container(
-                                      height: 40,
-                                      width: 40,
-                                      margin: const EdgeInsets.only(right: 5),
-                                      decoration: BoxDecoration(
-                                        border: (selectedImageIndex == index)
-                                            ? Border.all(
-                                                color: ColorConstants.yellow)
-                                            : null,
-                                      ),
-                                      child: Image(
-                                        image: FileImage(
-                                          imagesList[index],
-                                        ),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  );
-                                }),
+            body: Container(
+              height: double.infinity,
+              width: double.infinity,
+              color: ColorConstants.black,
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: (imagesList.isNotEmpty)
+                  ? Stack(
+                      children: [
+                        SizedBox(
+                          height: double.infinity,
+                          width: double.infinity,
+                          child: Image(
+                            image: FileImage(
+                              imagesList[selectedImageIndex],
+                            ),
+                            fit: BoxFit.contain,
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 45),
-                            child: Row(
-                              children: [
-                                Flexible(
-                                    child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20),
-                                  child: TextFormField(
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              height: 60,
+                              width: double.infinity,
+                              color: Colors.grey.withOpacity(0.15),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: ListView.builder(
+                                  itemCount: imagesList.length,
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+                                    return InkWell(
+                                      onTap: () {
+                                        messageImageBloc.add(
+                                          ChangeSelectedImageEvent(
+                                              context: context,
+                                              currentIndex: index),
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 40,
+                                        width: 40,
+                                        margin: const EdgeInsets.only(right: 5),
+                                        decoration: BoxDecoration(
+                                          border: (selectedImageIndex == index)
+                                              ? Border.all(
+                                                  color: ColorConstants.yellow)
+                                              : null,
+                                        ),
+                                        child: Image(
+                                          image: FileImage(
+                                            imagesList[index],
+                                          ),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 45),
+                              child: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Flexible(
+                                      child: TextFormField(
                                     keyboardType: TextInputType.multiline,
                                     controller: TextEditingController.fromValue(
                                       TextEditingValue(
@@ -128,11 +159,11 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                       captionText = val;
                                     },
                                     decoration: InputDecoration(
-                                      hintText: 'Add a caption...',
+                                      hintText: ('Add a caption...'),
                                       filled: true,
                                       fillColor: Colors.white,
                                       hintStyle: const TextStyle(
-                                        color: ColorConstants.grey,
+                                        color: ColorConstants.black,
                                         fontWeight: FontWeight.w500,
                                         fontSize: 18,
                                       ),
@@ -157,85 +188,66 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                         ),
                                       ),
                                     ),
-                                  ),
-                                )),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: Material(
-                                    type: MaterialType.circle,
-                                    color: ColorConstants.yellow,
-                                    clipBehavior: Clip.hardEdge,
-                                    child: InkWell(
-                                      onTap: () async {
-                                        List<Attachment> attachments = [];
-
-                                        for (var imagesData in imagesList) {
-                                          print(
-                                              'image path : ${imagesData.path}');
-                                          attachments.add(Attachment(
-                                              type: 'image',
-                                              file: AttachmentFile(
-                                                  size: imagesData.lengthSync(),
-                                                  path: imagesData.path)));
-                                        }
-
-                                        Message message = Message(
-                                            text: captionText,
-                                            attachments: attachments);
-                                        await channel.sendMessage(message);
-
-                                        clearImages();
-                                        Navigator.of(context).maybePop();
-                                      },
-                                      child: Container(
-                                        height: 45,
-                                        width: 45,
-                                        alignment: Alignment.center,
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.send,
-                                          color: Colors.black,
-                                          size: 20,
+                                  )),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 20, right: 10),
+                                    child: Material(
+                                      type: MaterialType.circle,
+                                      color: ColorConstants.yellow,
+                                      clipBehavior: Clip.hardEdge,
+                                      child: InkWell(
+                                        onTap: () async {
+                                          if (state
+                                              is! SendingMessageImageState) {
+                                            messageImageBloc.add(
+                                              SendMessageImageAttachmentEvent(
+                                                  context: context,
+                                                  captionText: captionText),
+                                            );
+                                          }
+                                        },
+                                        child: Container(
+                                          height: 45,
+                                          width: 45,
+                                          alignment: Alignment.center,
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: (state
+                                                  is SendingMessageImageState)
+                                              ? Container(
+                                                  height: 30,
+                                                  width: 30,
+                                                  alignment: Alignment.center,
+                                                  child:
+                                                      const CircularProgressIndicator
+                                                          .adaptive(
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                  ),
+                                                )
+                                              : const Icon(
+                                                  Icons.send,
+                                                  color: Colors.black,
+                                                  size: 20,
+                                                ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                )
-              : const Text('No images'),
-        ),
-      ),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    )
+                  : const Text('No images'),
+            ),
+          ),
+        );
+      },
     );
-  }
-
-  void _initiliseData() {
-    if (!isDataInitilised) {
-      var routeData = ModalRoute.of(context)!.settings.arguments;
-
-      if (routeData != null && routeData is Map) {
-        channel = routeData['channel'];
-        selectedImages = routeData['selected_images'];
-
-        if (selectedImages.isNotEmpty) {
-          for (var imageData in selectedImages) {
-            imagesList.add(File(imageData.path));
-          }
-        }
-      }
-      isDataInitilised = true;
-    }
-  }
-
-  void clearImages() {
-    BlocProvider.of<MessagesBloc>(context).clearSelectedImages();
   }
 }

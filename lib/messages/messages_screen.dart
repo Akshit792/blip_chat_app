@@ -26,7 +26,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
   Member? otherUser;
   User? otherUserDetails;
   bool isDataInitilised = false;
-  bool isUserOnline = false;
 
   @override
   void didChangeDependencies() {
@@ -50,11 +49,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
           bottom: false,
           child: Column(
             children: <Widget>[
+              // User Details
               Container(
-                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 25),
+                padding: const EdgeInsets.only(
+                    left: 20, top: 15, right: 20, bottom: 25),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    // User Image
                     AvatarImageWidget(userDetails: otherUserDetails),
                     const SizedBox(
                       width: 15,
@@ -62,6 +64,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // User Name
                         Text(
                           (otherUserDetails != null)
                               ? otherUserDetails!.name
@@ -75,13 +78,27 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         const SizedBox(
                           height: 5,
                         ),
+                        // User Status
                         if (channel.state != null)
-                          _buildMemberStatus(channelState: channel.state!),
+                          _buildMemberStatus(
+                            channelState: channel.state!,
+                          ),
                       ],
-                    )
+                    ),
+                    const Spacer(),
+                    IconButton(
+                        onPressed: () {
+                          //TODO:
+                        },
+                        icon: const Icon(
+                          Icons.more_vert,
+                          color: Colors.white,
+                          size: 28,
+                        ))
                   ],
                 ),
               ),
+              // Messages List
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -97,7 +114,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       emptyBuilder: (context) {
                         return const Center(
                           child: Text(
-                            'Nothing here...',
+                            ('Nothing here...'),
                             style: TextStyle(
                               color: ColorConstants.grey,
                             ),
@@ -106,7 +123,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       },
                       loadingBuilder: (context) {
                         return const Center(
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator.adaptive(
+                            strokeWidth: 2.5,
+                          ),
                         );
                       },
                       messageListBuilder: (context, messagesList) {
@@ -117,7 +136,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       errorBuilder: (context, err) {
                         return const Center(
                           child: Text(
-                            'Oh no, something went wrong.',
+                            ('Oh no, something went wrong.'),
                             style: TextStyle(
                               color: ColorConstants.grey,
                             ),
@@ -128,103 +147,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   ),
                 ),
               ),
-              Container(
-                height: 120,
-                color: Colors.white,
-                alignment: Alignment.center,
-                child: Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        _buildAddAttachmentsDialogBox();
-                      },
-                      child: Container(
-                        height: 45,
-                        width: 45,
-                        alignment: Alignment.center,
-                        margin: const EdgeInsets.only(left: 20),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: ColorConstants.yellow,
-                        ),
-                        child: const Icon(
-                          Icons.add,
-                          color: ColorConstants.black,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                    Flexible(
-                        child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: TextFormField(
-                        controller: _messageInputController.textFieldController,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                          hintText: 'Type Message',
-                          hintStyle: const TextStyle(
-                            color: ColorConstants.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 25, vertical: 20),
-                          border: InputBorder.none,
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: const BorderSide(
-                                color: ColorConstants.grey,
-                                width: 1.4,
-                              )),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(
-                              color: ColorConstants.grey,
-                              width: 1.4,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: Material(
-                        type: MaterialType.circle,
-                        color: ColorConstants.yellow,
-                        clipBehavior: Clip.hardEdge,
-                        child: InkWell(
-                          onTap: () async {
-                            if (_messageInputController
-                                    .message.text?.isNotEmpty ==
-                                true) {
-                              BlocProvider.of<MessagesBloc>(context)
-                                  .add(SendMessageEvent(
-                                context: context,
-                                message: _messageInputController.message,
-                              ));
-
-                              _messageInputController.clear();
-                            }
-                          },
-                          child: Container(
-                            height: 45,
-                            width: 45,
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.send,
-                              color: Colors.black,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
+              _buildInputMessageWidget(),
             ],
           ),
         ),
@@ -232,119 +155,221 @@ class _MessagesScreenState extends State<MessagesScreen> {
     });
   }
 
-//TODO: SHOW THE ATTACHMENTS
   Widget _buildMessageList({
     required List<Message> messagesList,
     required User? otherUser,
   }) {
     return ListView.builder(
-        reverse: true,
-        itemCount: messagesList.length,
-        itemBuilder: (context, index) {
-          var messageData = messagesList[index];
+      reverse: true,
+      itemCount: messagesList.length,
+      itemBuilder: (context, index) {
+        var messageData = messagesList[index];
 
-          User? currentUser = Helpers.getCurrentUser(context: context);
+        User? currentUser = Helpers.getCurrentUser(context: context);
 
-          bool isThisCurrentUser = (messageData.user!.id == currentUser!.id);
+        bool isThisCurrentUser = (messageData.user!.id == currentUser!.id);
 
-          bool isThereAttachments = (messageData.attachments.isNotEmpty);
+        bool isThereAttachments = (messageData.attachments.isNotEmpty);
 
-          String attachmentType = isThereAttachments
-              ? messageData.attachments.first.type ?? ""
-              : "";
+        String attachmentType = isThereAttachments
+            ? (messageData.attachments.first.type ?? "")
+            : "";
 
-          return SizedBox(
-            width: MediaQuery.of(context).size.height * 0.4,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Column(
-                crossAxisAlignment: isThisCurrentUser
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
+        return Container(
+          width: MediaQuery.of(context).size.height * 0.4,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Column(
+            crossAxisAlignment: (isThisCurrentUser)
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: (isThisCurrentUser)
+                    ? MainAxisAlignment.end
+                    : MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Row(
-                    mainAxisAlignment: isThisCurrentUser
-                        ? MainAxisAlignment.end
-                        : MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 200,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 15,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.yellow[200]!,
+                  Container(
+                    width: 200,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 20,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.yellow[200]!,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                      color: (isThisCurrentUser)
+                          ? ColorConstants.lightYellow
+                          : ColorConstants.lightOrange,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Message Attachments
+                        if (isThereAttachments &&
+                            Helpers.isStringValid(
+                                text: messageData.attachments.first.imageUrl))
+                          _buildAttachmentsWidget(
+                            attachments: messageData.attachments,
+                            attachmentType: attachmentType,
                           ),
-                          borderRadius: BorderRadius.circular(30),
-                          color: isThisCurrentUser
-                              ? ColorConstants.lightYellow
-                              : ColorConstants.lightOrange,
+                        // Message Text
+                        Text(
+                          (messageData.text!),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (isThereAttachments &&
-                                Helpers.isStringValid(
-                                    text:
-                                        messageData.attachments.first.imageUrl))
-                              _buildAttachmentsWidget(
-                                attachments: messageData.attachments,
-                                attachmentType: attachmentType,
-                              ),
-                            Text(
-                              messageData.text!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Icon(
-                        messageData.status == MessageSendingStatus.sent
-                            ? Icons.done_all
-                            : messageData.status == MessageSendingStatus.sending
-                                ? Icons.done
-                                : Icons.error,
-                        color:
-                            (messageData.status == MessageSendingStatus.sent ||
-                                    messageData.status ==
-                                        MessageSendingStatus.sending)
-                                ? ColorConstants.grey
-                                : Colors.red,
-                        size: 18,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(
-                    height: 10,
+                    width: 10,
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: isThisCurrentUser ? 0 : 4,
-                        right: isThisCurrentUser ? 4 : 0),
-                    child: Text(
-                      Helpers.getTimeStringFromDateTime(
-                          dateTime: messageData.createdAt),
-                      style: const TextStyle(
-                        color: ColorConstants.grey,
-                      ),
-                    ),
+                  // Message Sending Status
+                  Icon(
+                    messageData.status == MessageSendingStatus.sent
+                        ? Icons.done_all
+                        : messageData.status == MessageSendingStatus.sending
+                            ? Icons.done
+                            : Icons.error,
+                    color: (messageData.status == MessageSendingStatus.sent ||
+                            messageData.status == MessageSendingStatus.sending)
+                        ? ColorConstants.grey
+                        : Colors.red,
+                    size: 18,
                   ),
                 ],
               ),
-            ),
-          );
-        });
+              const SizedBox(
+                height: 10,
+              ),
+              // Message Date Time
+              Padding(
+                padding: EdgeInsets.only(
+                    left: isThisCurrentUser ? 0 : 4,
+                    right: isThisCurrentUser ? 4 : 0),
+                child: Text(
+                  Helpers.getTimeStringFromDateTime(
+                      dateTime: messageData.createdAt),
+                  style: const TextStyle(
+                    color: ColorConstants.grey,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
-  _buildMemberStatus({required ChannelClientState channelState}) {
+  Widget _buildInputMessageWidget() {
+    return Container(
+      height: 100,
+      color: Colors.white,
+      alignment: Alignment.center,
+      child: Row(
+        children: [
+          // Add Attachments
+          InkWell(
+            onTap: () {
+              _buildAddAttachmentsDialogBox();
+            },
+            child: Container(
+              height: 45,
+              width: 45,
+              alignment: Alignment.center,
+              margin: const EdgeInsets.only(left: 20),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: ColorConstants.yellow,
+              ),
+              child: const Icon(
+                Icons.add,
+                color: ColorConstants.black,
+                size: 30,
+              ),
+            ),
+          ),
+          // Type Message Input Field
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: TextFormField(
+                controller: _messageInputController.textFieldController,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                decoration: InputDecoration(
+                  hintText: 'Type Message',
+                  hintStyle: const TextStyle(
+                    color: ColorConstants.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  border: InputBorder.none,
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: const BorderSide(
+                        color: ColorConstants.grey,
+                        width: 1.4,
+                      )),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: ColorConstants.grey,
+                      width: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Send Message
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Material(
+              type: MaterialType.circle,
+              color: ColorConstants.yellow,
+              clipBehavior: Clip.hardEdge,
+              child: InkWell(
+                onTap: () async {
+                  if (_messageInputController.message.text?.isNotEmpty ==
+                      true) {
+                    BlocProvider.of<MessagesBloc>(context).add(SendMessageEvent(
+                      context: context,
+                      message: _messageInputController.message,
+                    ));
+
+                    _messageInputController.clear();
+                  }
+                },
+                child: Container(
+                  height: 45,
+                  width: 45,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.send,
+                    color: Colors.black,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMemberStatus({required ChannelClientState channelState}) {
     return StreamBuilder(
         stream: channelState.membersStream,
         initialData: channelState.members,
@@ -359,23 +384,24 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
             if (otherMember.user != null) {
               isOnline = otherMember.user!.online;
-              isUserOnline = isOnline;
             }
 
             if (isOnline) {
               return const Text(
-                'online',
+                ('online'),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
+                  fontSize: 16,
                 ),
               );
             } else {
               return const Text(
-                'offline',
+                ('offline'),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
+                  fontSize: 16,
                 ),
               );
             }
@@ -384,54 +410,16 @@ class _MessagesScreenState extends State<MessagesScreen> {
         });
   }
 
-  _buildAddAttachmentsDialogBox() {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildSelectAttachmentTypeWidget(
-                  icon: Icons.image,
-                  labelText: 'Select Image',
-                  onTap: () {
-                    BlocProvider.of<MessagesBloc>(context)
-                        .add(TakeImageMessageEvent(
-                      context: context,
-                      isSourceGallery: true,
-                    ));
-                  },
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                _buildSelectAttachmentTypeWidget(
-                  icon: Icons.camera_alt,
-                  labelText: 'Take Image',
-                  onTap: () {
-                    BlocProvider.of<MessagesBloc>(context)
-                        .add(TakeImageMessageEvent(
-                      context: context,
-                      isSourceGallery: false,
-                    ));
-                  },
-                ),
-              ],
-            ),
-          );
-        });
-  }
-
-  _buildAttachmentsWidget({
+  Widget _buildAttachmentsWidget({
     required List<Attachment> attachments,
     required String attachmentType,
   }) {
     if (attachmentType.trim() == 'image') {
       return Stack(
         children: [
+          // Image
           Container(
-            height: 120,
+            height: 130,
             width: double.infinity,
             margin: const EdgeInsets.only(bottom: 10),
             child: ClipRRect(
@@ -442,15 +430,17 @@ class _MessagesScreenState extends State<MessagesScreen> {
               ),
             ),
           ),
+          // Download icon
           Container(
-            height: 120,
+            height: 130,
             width: double.infinity,
             alignment: Alignment.center,
             child: LayoutBuilder(builder: (context, constraints) {
               return Material(
                 color: Colors.grey.withOpacity(0.3),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(80)),
+                  borderRadius: BorderRadius.circular(80),
+                ),
                 child: InkWell(
                   onTap: () {
                     List<String> imageUrls = [];
@@ -467,7 +457,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       return BlocProvider(
                         create: (BuildContext context) =>
                             ViewImageBloc(imagesUrl: imageUrls),
-                        child: const ViewImageScreen(),
+                        child: ViewImageScreen(),
                       );
                     }));
                   },
@@ -491,7 +481,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                           width: 7,
                         ),
                         Text(
-                          '${attachments.length > 10 ? "10+" : attachments.length}  ${attachments.length > 1 ? "Photos" : "Photo"}',
+                          ('${attachments.length > 10 ? "10+" : attachments.length}  ${attachments.length > 1 ? "Photos" : "Photo"}'),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -511,7 +501,50 @@ class _MessagesScreenState extends State<MessagesScreen> {
     return const SizedBox.shrink();
   }
 
-  _buildSelectAttachmentTypeWidget({
+  void _buildAddAttachmentsDialogBox() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSelectAttachmentTypeWidget(
+                  icon: Icons.image,
+                  labelText: ('Select Image'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    BlocProvider.of<MessagesBloc>(context).add(
+                      TakeImageMessageEvent(
+                        context: context,
+                        isSourceGallery: true,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                _buildSelectAttachmentTypeWidget(
+                  icon: Icons.camera_alt,
+                  labelText: ('Take Image'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    BlocProvider.of<MessagesBloc>(context).add(
+                      TakeImageMessageEvent(
+                        context: context,
+                        isSourceGallery: false,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  Widget _buildSelectAttachmentTypeWidget({
     required IconData icon,
     required String labelText,
     required void Function()? onTap,

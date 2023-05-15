@@ -25,15 +25,24 @@ PODS:
     - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
+  - gallery_saver (0.0.1):
+    - Flutter
   - GoogleUtilities/Environment (7.11.1):
     - PromisesObjC (< 3.0, >= 1.2)
   - GoogleUtilities/Logger (7.11.1):
     - GoogleUtilities/Environment
   - "GoogleUtilities/NSData+zlib (7.11.1)"
+  - image_cropper (0.0.4):
+    - Flutter
+    - TOCropViewController (~> 2.6.1)
   - image_picker_ios (0.0.1):
     - Flutter
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - PromisesObjC (2.2.0)
   - ReachabilitySwift (5.0.0)
+  - TOCropViewController (2.6.1)
 
 DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
@@ -41,7 +50,10 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
+  - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
 
 SPEC REPOS:
   trunk:
@@ -52,6 +64,7 @@ SPEC REPOS:
     - GoogleUtilities
     - PromisesObjC
     - ReachabilitySwift
+    - TOCropViewController
 
 EXTERNAL SOURCES:
   connectivity_plus:
@@ -64,8 +77,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_appauth/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  gallery_saver:
+    :path: ".symlinks/plugins/gallery_saver/ios"
+  image_cropper:
+    :path: ".symlinks/plugins/image_cropper/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/ios"
 
 SPEC CHECKSUMS:
   AppAuth: 8fca6b5563a5baef2c04bee27538025e4ceb2add
@@ -77,10 +96,14 @@ SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_appauth: 525652bda90e43ca5eb7ed748ecc106b79d1f5a1
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
+  gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
   GoogleUtilities: 9aa0ad5a7bc171f8bae016300bfcfa3fb8425749
+  image_cropper: a3291c624a953049bc6a02e1f8c8ceb162a24b25
   image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
+  path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
+  TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
 
 PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 
