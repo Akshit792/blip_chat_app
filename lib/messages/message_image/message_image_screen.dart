@@ -3,7 +3,6 @@
 import 'dart:io';
 
 import 'package:blip_chat_app/common/constants.dart';
-import 'package:blip_chat_app/messages/bloc/messages_bloc.dart';
 import 'package:blip_chat_app/messages/message_image/bloc/message_event_state.dart';
 import 'package:blip_chat_app/messages/message_image/bloc/message_image_bloc.dart';
 import 'package:blip_chat_app/messages/message_image/bloc/message_image_event.dart';

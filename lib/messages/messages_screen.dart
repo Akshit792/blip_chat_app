@@ -269,7 +269,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   Widget _buildInputMessageWidget() {
     return Container(
-      height: 100,
+      height: 110,
       color: Colors.white,
       alignment: Alignment.center,
       child: Row(
