@@ -39,7 +39,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
         LogPrint.error(error: e, errorMsg: 'Send Message Event', stackTrace: s);
       }
     });
-    on<TakeImageMessageEvent>((event, emit) async {
+    on<PickImageMessageEvent>((event, emit) async {
       try {
         ImageSource source =
             event.isSourceGallery ? ImageSource.gallery : ImageSource.camera;

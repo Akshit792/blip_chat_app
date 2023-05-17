@@ -457,7 +457,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       return BlocProvider(
                         create: (BuildContext context) =>
                             ViewImageBloc(imagesUrl: imageUrls),
-                        child: ViewImageScreen(),
+                        child: const ViewImageScreen(),
                       );
                     }));
                   },
@@ -515,7 +515,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   onTap: () {
                     Navigator.of(context).pop();
                     BlocProvider.of<MessagesBloc>(context).add(
-                      TakeImageMessageEvent(
+                      PickImageMessageEvent(
                         context: context,
                         isSourceGallery: true,
                       ),
@@ -531,7 +531,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   onTap: () {
                     Navigator.of(context).pop();
                     BlocProvider.of<MessagesBloc>(context).add(
-                      TakeImageMessageEvent(
+                      PickImageMessageEvent(
                         context: context,
                         isSourceGallery: false,
                       ),

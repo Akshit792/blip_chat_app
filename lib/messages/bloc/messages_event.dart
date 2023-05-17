@@ -23,11 +23,11 @@ class SetUnReadMessagesAsRead extends MessagesEvent {
   });
 }
 
-class TakeImageMessageEvent extends MessagesEvent {
+class PickImageMessageEvent extends MessagesEvent {
   final BuildContext context;
   final bool isSourceGallery;
 
-  TakeImageMessageEvent({
+  PickImageMessageEvent({
     required this.context,
     required this.isSourceGallery,
   });
