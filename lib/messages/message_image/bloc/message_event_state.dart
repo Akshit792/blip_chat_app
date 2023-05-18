@@ -1,7 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:blip_chat_app/common/models/logger.dart';
-import 'package:blip_chat_app/messages/bloc/messages_bloc.dart';
 import 'package:blip_chat_app/messages/message_image/bloc/message_image_bloc.dart';
 import 'package:blip_chat_app/messages/message_image/bloc/message_image_event.dart';
 import 'package:flutter/material.dart';
@@ -34,11 +35,12 @@ class MessageImageBloc extends Bloc<MessageImageEvent, MessageImageState> {
             compressQuality: 100,
             uiSettings: [
               AndroidUiSettings(
-                  toolbarTitle: ('Crop'),
-                  toolbarColor: Colors.deepOrange,
-                  toolbarWidgetColor: Colors.white,
-                  initAspectRatio: CropAspectRatioPreset.original,
-                  lockAspectRatio: false),
+                toolbarTitle: ('Crop'),
+                toolbarColor: Colors.deepOrange,
+                toolbarWidgetColor: Colors.white,
+                initAspectRatio: CropAspectRatioPreset.original,
+                lockAspectRatio: false,
+              ),
               IOSUiSettings(
                 title: ('Crop'),
               ),
@@ -50,7 +52,10 @@ class MessageImageBloc extends Bloc<MessageImageEvent, MessageImageState> {
                   height: 520,
                 ),
                 viewPort: const CroppieViewPort(
-                    width: 480, height: 480, type: 'circle'),
+                  width: 480,
+                  height: 480,
+                  type: 'circle',
+                ),
                 enableExif: true,
                 enableZoom: true,
                 showZoomer: true,
@@ -77,47 +82,48 @@ class MessageImageBloc extends Bloc<MessageImageEvent, MessageImageState> {
           }
         } on Exception catch (e, s) {
           LogPrint.error(
-              error: e, errorMsg: 'Crop Selected Image Event', stackTrace: s);
+            error: e,
+            errorMsg: 'Crop Selected Image Event',
+            stackTrace: s,
+          );
         }
       },
     );
-    on<SendMessageImageAttachmentEvent>((event, emit) async {
-      try {
-        emit(SendingMessageImageState());
+    on<SendMessageImageAttachmentEvent>(
+      (event, emit) async {
+        try {
+          emit(SendingMessageImageState());
 
-        List<Attachment> attachments = [];
+          List<Attachment> attachments = [];
 
-        for (var imagesData in imagesList) {
-          attachments.add(
-            Attachment(
-              type: ('image'),
-              file: AttachmentFile(
-                  size: imagesData.lengthSync(), path: imagesData.path),
-            ),
+          for (var imagesData in imagesList) {
+            attachments.add(
+              Attachment(
+                type: ('image'),
+                file: AttachmentFile(
+                  size: imagesData.lengthSync(),
+                  path: imagesData.path,
+                ),
+              ),
+            );
+          }
+
+          Message message =
+              Message(text: event.captionText, attachments: attachments);
+
+          await channel.sendMessage(message);
+
+          Navigator.of(event.context).maybePop();
+
+          emit(LoadedMessagesImageState());
+        } on Exception catch (e, s) {
+          LogPrint.error(
+            error: e,
+            errorMsg: 'Send Message Image Attachment Event',
+            stackTrace: s,
           );
         }
-
-        Message message =
-            Message(text: event.captionText, attachments: attachments);
-
-        await channel.sendMessage(message);
-//TODO:
-        clearImages(context: event.context);
-
-        Navigator.of(event.context).maybePop();
-
-        emit(LoadedMessagesImageState());
-      } on Exception catch (e, s) {
-        LogPrint.error(
-          error: e,
-          errorMsg: 'Send Message Image Attachment Event',
-          stackTrace: s,
-        );
-      }
-    });
-  }
-
-  void clearImages({required BuildContext context}) {
-    BlocProvider.of<MessagesBloc>(context).clearSelectedImages();
+      },
+    );
   }
 }

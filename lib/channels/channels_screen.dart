@@ -4,6 +4,7 @@ import 'package:blip_chat_app/channels/bloc/channels_state.dart';
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/helpers.dart';
 import 'package:blip_chat_app/common/widgets/avatar_image_widget.dart';
+import 'package:blip_chat_app/messages/bloc/messages_bloc.dart';
 import 'package:blip_chat_app/messages/messages_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,18 +43,20 @@ class ChannelsScreen extends StatelessWidget {
               text: TextSpan(
                 children: <TextSpan>[
                   const TextSpan(
-                      text: 'Welcome Back, ',
-                      style: TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.w300,
-                      )),
+                    text: 'Welcome Back, ',
+                    style: TextStyle(
+                      fontSize: 21,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
                   // User Name
                   TextSpan(
-                      text: (currentUser != null) ? (currentUser.name) : "",
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                      ))
+                    text: (currentUser != null) ? (currentUser.name) : "",
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  )
                 ],
               ),
             ),
@@ -82,6 +85,7 @@ class ChannelsScreen extends StatelessWidget {
           channelsBloc
               .add(InitilizeChannelListControllerEvent(context: context));
         }
+
         bool isChannelInitilized =
             (channelsBloc.isChannelListControllerInitilized != null &&
                 channelsBloc.isChannelListControllerInitilized!);
@@ -194,15 +198,19 @@ class ChannelsScreen extends StatelessWidget {
             color: Colors.grey[100],
             child: ListTile(
               onTap: () {
-                var arguments = {
-                  'channel_data': channelData,
-                };
-
-                Navigator.of(context).push(MaterialPageRoute(
+                Navigator.of(context).push(
+                  MaterialPageRoute(
                     builder: (context) {
-                      return const MessagesScreen();
+                      return BlocProvider(
+                        create: (BuildContext context) => MessagesBloc(
+                          channel: channelData,
+                          otherUser: otherUser,
+                        ),
+                        child: const MessagesScreen(),
+                      );
                     },
-                    settings: RouteSettings(arguments: arguments)));
+                  ),
+                );
               },
               leading: AvatarImageWidget(userDetails: otherUserDetails),
               title: Row(

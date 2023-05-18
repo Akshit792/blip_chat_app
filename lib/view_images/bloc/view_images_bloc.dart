@@ -11,30 +11,33 @@ class ViewImageBloc extends Bloc<ViewImageEvent, ViewImageState> {
   String currentImagePath = "";
 
   ViewImageBloc({required this.imagesUrl}) : super(InitialViewImageState()) {
-    on<SaveImageToGalleryViewImageEvent>((event, emit) async {
-      try {
-        var imageId = await ImageDownloader.downloadImage(currentImagePath);
+    on<SaveImageToGalleryViewImageEvent>(
+      (event, emit) async {
+        try {
+          var imageId = await ImageDownloader.downloadImage(currentImagePath);
 
-        if (imageId == null) {
+          if (imageId == null) {
+            CustomFlutterToast.error(message: 'Image is not saved');
+          }
+
+          if (imageId != null) {
+            var path = await ImageDownloader.findPath(imageId);
+
+            GallerySaver.saveImage(path ?? "");
+
+            CustomFlutterToast.success(message: 'Image is saved to gallery');
+
+            emit(ImageSavedToGalleryState());
+          }
+        } on Exception catch (e, s) {
+          LogPrint.error(
+            error: e,
+            errorMsg: 'Save Image To Gallery View Image Event',
+            stackTrace: s,
+          );
           CustomFlutterToast.error(message: 'Image is not saved');
         }
-
-        if (imageId != null) {
-          var path = await ImageDownloader.findPath(imageId);
-
-          GallerySaver.saveImage(path ?? "");
-
-          CustomFlutterToast.success(message: 'Image is saved to gallery');
-
-          emit(ImageSavedToGalleryState());
-        }
-      } on Exception catch (e, s) {
-        LogPrint.error(
-          error: e,
-          errorMsg: 'Save Image To Gallery View Image Event',
-          stackTrace: s,
-        );
-      }
-    });
+      },
+    );
   }
 }

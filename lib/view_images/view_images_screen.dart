@@ -1,4 +1,5 @@
 import 'package:blip_chat_app/common/constants.dart';
+import 'package:blip_chat_app/common/helpers.dart';
 import 'package:blip_chat_app/view_images/bloc/view_images_bloc.dart';
 import 'package:blip_chat_app/view_images/bloc/view_images_event.dart';
 import 'package:blip_chat_app/view_images/bloc/view_images_state.dart';
@@ -15,11 +16,11 @@ class ViewImageScreen extends StatelessWidget {
     return BlocBuilder<ViewImageBloc, ViewImageState>(
       builder: (context, state) {
         var viewImageBloc = BlocProvider.of<ViewImageBloc>(context);
+
         List<String> imagesUrl = viewImageBloc.imagesUrl;
-        if (viewImageBloc.currentImagePath.trim() == "") {
-          BlocProvider.of<ViewImageBloc>(context).currentImagePath =
-              imagesUrl.first;
-        }
+
+        viewImageBloc.currentImagePath = imagesUrl.first;
+
         return Scaffold(
             backgroundColor: Colors.black,
             appBar: AppBar(
@@ -34,10 +35,7 @@ class ViewImageScreen extends StatelessWidget {
                 ),
               ),
               actions: [
-                if (BlocProvider.of<ViewImageBloc>(context)
-                        .currentImagePath
-                        .trim() !=
-                    "")
+                if (Helpers.isStringValid(text: viewImageBloc.currentImagePath))
                   IconButton(
                     onPressed: () {
                       viewImageBloc.add(

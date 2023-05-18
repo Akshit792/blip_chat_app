@@ -13,11 +13,11 @@ class SendMessageEvent extends MessagesEvent {
   });
 }
 
-class SetUnReadMessagesAsRead extends MessagesEvent {
+class SetUnReadMessagesAsReadEvent extends MessagesEvent {
   final BuildContext context;
   final Channel channel;
 
-  SetUnReadMessagesAsRead({
+  SetUnReadMessagesAsReadEvent({
     required this.context,
     required this.channel,
   });

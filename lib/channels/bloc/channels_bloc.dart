@@ -11,24 +11,30 @@ class ChannelsBloc extends Bloc<ChannelsEvent, ChannelsState> {
   bool? isChannelListControllerInitilized;
 
   ChannelsBloc() : super(InitialChannelState()) {
-    on<InitilizeChannelListControllerEvent>((event, emit) async {
-      try {
-        var chatRepo = RepositoryProvider.of<ChatRepository>(event.context);
+    on<InitilizeChannelListControllerEvent>(
+      (event, emit) async {
+        try {
+          var chatRepo = RepositoryProvider.of<ChatRepository>(event.context);
 
-        streamChannelListController =
-            chatRepo.getStreamChannelListController(event.context);
+          streamChannelListController =
+              chatRepo.getStreamChannelListController(event.context);
 
-        await streamChannelListController!.doInitialLoad();
-        isChannelListControllerInitilized = true;
-        emit(LoadedChannelState());
-      } on Exception catch (e, s) {
-        emit(ErrorChannelState());
-        LogPrint.error(
+          await streamChannelListController!.doInitialLoad();
+
+          isChannelListControllerInitilized = true;
+
+          emit(LoadedChannelState());
+        } on Exception catch (e, s) {
+          LogPrint.error(
             errorMsg: 'Initilise Channel List Controller',
             error: e,
-            stackTrace: s);
-      }
-    });
+            stackTrace: s,
+          );
+
+          emit(ErrorChannelState());
+        }
+      },
+    );
   }
 
   disposeChannelListController({required BuildContext context}) {
