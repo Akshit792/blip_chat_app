@@ -7,3 +7,9 @@ class InitilizeChannelListControllerEvent extends ChannelsEvent {
 
   InitilizeChannelListControllerEvent({required this.context});
 }
+
+class LoadMoreChannelsEvent extends ChannelsEvent {
+  final BuildContext context;
+
+  LoadMoreChannelsEvent({required this.context});
+}

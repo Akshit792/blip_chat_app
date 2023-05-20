@@ -32,3 +32,25 @@ class PickImageMessageEvent extends MessagesEvent {
     required this.isSourceGallery,
   });
 }
+
+class DeleteMessageEvent extends MessagesEvent {
+  final BuildContext context;
+
+  DeleteMessageEvent({
+    required this.context,
+  });
+}
+
+class SelectOrUnselectMessageEvent extends MessagesEvent {
+  final BuildContext context;
+  final bool isSelect;
+  final Message message;
+  final bool? isClear;
+
+  SelectOrUnselectMessageEvent({
+    required this.context,
+    required this.isSelect,
+    required this.message,
+    this.isClear,
+  });
+}

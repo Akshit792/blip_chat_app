@@ -27,6 +27,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   Member? otherUser;
   User? otherUserDetails;
   bool isDataInitilised = false;
+  List<Message> selectedMessages = [];
 
   @override
   void didChangeDependencies() {
@@ -49,6 +50,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
       },
       child: BlocBuilder<MessagesBloc, MessagesState>(
         builder: (context, state) {
+          selectedMessages =
+              BlocProvider.of<MessagesBloc>(context).selectedMessages;
+
           return Scaffold(
             backgroundColor: ColorConstants.black,
             body: SafeArea(
@@ -58,21 +62,34 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   // User Details
                   Container(
                     padding: const EdgeInsets.only(
-                        left: 20, top: 15, right: 20, bottom: 25),
+                        left: 15, top: 15, right: 20, bottom: 25),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         InkWell(
                           onTap: () {
-                            _cancelUnreadCountStream();
-                            Navigator.of(context).maybePop();
+                            if (selectedMessages.isEmpty) {
+                              BlocProvider.of<MessagesBloc>(context).add(
+                                SelectOrUnselectMessageEvent(
+                                  context: context,
+                                  isSelect: true,
+                                  message: Message(),
+                                  isClear: true,
+                                ),
+                              );
+                            } else {
+                              _cancelUnreadCountStream();
+                              Navigator.of(context).maybePop();
+                            }
                           },
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 2, right: 8),
+                            padding: const EdgeInsets.only(left: 0, right: 15),
                             child: Icon(
-                              Platform.isIOS
-                                  ? Icons.arrow_back_ios
-                                  : Icons.arrow_back,
+                              (selectedMessages.isNotEmpty)
+                                  ? Icons.close
+                                  : Platform.isIOS
+                                      ? Icons.arrow_back_ios
+                                      : Icons.arrow_back,
                               color: Colors.white,
                             ),
                           ),
@@ -82,41 +99,44 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         const SizedBox(
                           width: 15,
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // User Name
-                            Text(
-                              (otherUserDetails != null)
-                                  ? otherUserDetails!.name
-                                  : "",
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // User Name
+                              Text(
+                                (otherUserDetails != null)
+                                    ? otherUserDetails!.name
+                                    : "",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
+                                ),
                               ),
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            // User Status
-                            if (channel.state != null)
-                              _buildMemberStatus(
-                                channelState: channel.state!,
+                              const SizedBox(
+                                height: 5,
                               ),
-                          ],
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: () {
-                            //TODO: Delete messages
-                          },
-                          icon: const Icon(
-                            Icons.more_vert,
-                            color: Colors.white,
-                            size: 28,
+                              // User Status
+                              if (channel.state != null)
+                                _buildMemberStatus(
+                                  channelState: channel.state!,
+                                ),
+                            ],
                           ),
-                        )
+                        ),
+                        if (selectedMessages.isNotEmpty)
+                          IconButton(
+                            onPressed: () {
+                              BlocProvider.of<MessagesBloc>(context)
+                                  .add(DeleteMessageEvent(context: context));
+                            },
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                              size: 28,
+                            ),
+                          )
                       ],
                     ),
                   ),
@@ -201,90 +221,121 @@ class _MessagesScreenState extends State<MessagesScreen> {
             ? (messageData.attachments.first.type ?? "")
             : "";
 
-        return Container(
-          width: MediaQuery.of(context).size.height * 0.4,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Column(
-            crossAxisAlignment: (isThisCurrentUser)
-                ? CrossAxisAlignment.end
-                : CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: (isThisCurrentUser)
-                    ? MainAxisAlignment.end
-                    : MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    width: 200,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 20,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.yellow[200]!,
+        return InkWell(
+          onLongPress: () {
+            BlocProvider.of<MessagesBloc>(context).add(
+              SelectOrUnselectMessageEvent(
+                context: context,
+                isSelect: true,
+                message: messageData,
+              ),
+            );
+          },
+          onTap: () {
+            BlocProvider.of<MessagesBloc>(context).add(
+              SelectOrUnselectMessageEvent(
+                context: context,
+                isSelect: false,
+                message: messageData,
+              ),
+            );
+          },
+          child: Container(
+            width: MediaQuery.of(context).size.height * 0.4,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              border: (selectedMessages
+                      .any((message) => message.id == messageData.id))
+                  ? Border.all(width: 0.05)
+                  : null,
+              color: (selectedMessages
+                      .any((message) => message.id == messageData.id))
+                  ? Colors.yellow[50]
+                  : null,
+            ),
+            child: Column(
+              crossAxisAlignment: (isThisCurrentUser)
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: (isThisCurrentUser)
+                      ? MainAxisAlignment.end
+                      : MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      width: 200,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
                       ),
-                      borderRadius: BorderRadius.circular(30),
-                      color: (isThisCurrentUser)
-                          ? ColorConstants.lightYellow
-                          : ColorConstants.lightOrange,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Message Attachments
-                        if (isThereAttachments)
-                          _buildAttachmentsWidget(
-                            attachments: messageData.attachments,
-                            attachmentType: attachmentType,
-                          ),
-                        // Message Text
-                        Text(
-                          (messageData.text ?? ""),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.yellow[200]!,
                         ),
-                      ],
+                        borderRadius: BorderRadius.circular(30),
+                        color: (isThisCurrentUser)
+                            ? ColorConstants.lightYellow
+                            : ColorConstants.lightOrange,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Message Attachments
+                          if (isThereAttachments)
+                            _buildAttachmentsWidget(
+                              attachments: messageData.attachments,
+                              attachmentType: attachmentType,
+                            ),
+                          // Message Text
+                          Text(
+                            (messageData.text ?? ""),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  // Message Sending Status
-                  Icon(
-                    messageData.status == MessageSendingStatus.sent
-                        ? Icons.done_all
-                        : messageData.status == MessageSendingStatus.sending
-                            ? Icons.done
-                            : Icons.error,
-                    color: (messageData.status == MessageSendingStatus.sent ||
-                            messageData.status == MessageSendingStatus.sending)
-                        ? ColorConstants.grey
-                        : Colors.red,
-                    size: 18,
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              // Message Date Time
-              Padding(
-                padding: EdgeInsets.only(
-                    left: isThisCurrentUser ? 0 : 4,
-                    right: isThisCurrentUser ? 4 : 0),
-                child: Text(
-                  Helpers.getTimeStringFromDateTime(
-                      dateTime: messageData.createdAt),
-                  style: const TextStyle(
-                    color: ColorConstants.grey,
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    // Message Sending Status
+                    Icon(
+                      messageData.status == MessageSendingStatus.sent
+                          ? Icons.done_all
+                          : messageData.status == MessageSendingStatus.sending
+                              ? Icons.done
+                              : Icons.error,
+                      color: (messageData.status == MessageSendingStatus.sent ||
+                              messageData.status ==
+                                  MessageSendingStatus.sending)
+                          ? ColorConstants.grey
+                          : Colors.red,
+                      size: 18,
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                // Message Date Time
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: isThisCurrentUser ? 0 : 4,
+                      right: isThisCurrentUser ? 4 : 0),
+                  child: Text(
+                    Helpers.getTimeStringFromDateTime(
+                        dateTime: messageData.createdAt),
+                    style: const TextStyle(
+                      color: ColorConstants.grey,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

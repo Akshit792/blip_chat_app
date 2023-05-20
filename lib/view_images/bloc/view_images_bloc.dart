@@ -4,7 +4,6 @@ import 'package:blip_chat_app/view_images/bloc/view_images_event.dart';
 import 'package:blip_chat_app/view_images/bloc/view_images_state.dart';
 import 'package:bloc/bloc.dart';
 import 'package:gallery_saver/gallery_saver.dart';
-import 'package:image_downloader/image_downloader.dart';
 
 class ViewImageBloc extends Bloc<ViewImageEvent, ViewImageState> {
   final List<String> imagesUrl;
@@ -14,21 +13,21 @@ class ViewImageBloc extends Bloc<ViewImageEvent, ViewImageState> {
     on<SaveImageToGalleryViewImageEvent>(
       (event, emit) async {
         try {
-          var imageId = await ImageDownloader.downloadImage(currentImagePath);
+          // var imageId = await ImageDownloader.downloadImage(currentImagePath);
 
-          if (imageId == null) {
-            CustomFlutterToast.error(message: 'Image is not saved');
-          }
+          // if (imageId == null) {
+          //   CustomFlutterToast.error(message: 'Image is not saved');
+          // }
 
-          if (imageId != null) {
-            var path = await ImageDownloader.findPath(imageId);
+          // if (imageId != null) {
+          //   var path = await ImageDownloader.findPath(imageId);
 
-            GallerySaver.saveImage(path ?? "");
+          //   GallerySaver.saveImage(path ?? "");
 
-            CustomFlutterToast.success(message: 'Image is saved to gallery');
+          //   CustomFlutterToast.success(message: 'Image is saved to gallery');
 
-            emit(ImageSavedToGalleryState());
-          }
+          //   emit(ImageSavedToGalleryState());
+          // }
         } on Exception catch (e, s) {
           LogPrint.error(
             error: e,

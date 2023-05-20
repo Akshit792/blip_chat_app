@@ -8,6 +8,7 @@ import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:blip_chat_app/messages/bloc/messages_event.dart';
 import 'package:blip_chat_app/messages/bloc/messages_state.dart';
 import 'package:blip_chat_app/messages/message_image/bloc/message_event_state.dart';
+import 'package:blip_chat_app/messages/message_image/message_image_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,6 +19,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
   Channel channel;
   Member otherUser;
   List<XFile> selectedImages = [];
+  List<Message> selectedMessages = [];
   final ImagePicker _imagePicker = ImagePicker();
 
   MessagesBloc({
@@ -89,16 +91,13 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
                       imagesList: imagesList,
                       selectedImages: selectedImages,
                     ),
+                    child: const MessageImageScreen(),
                   );
                 },
               ),
             );
 
             clearSelectedImages();
-          } else {
-            CustomFlutterToast.error(
-              message: ('Unable To Pick Image'),
-            );
           }
         } on Exception catch (e, s) {
           LogPrint.error(
@@ -112,6 +111,49 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
         }
       },
     );
+    on<DeleteMessageEvent>((event, emit) async {
+      try {
+        for (var message in selectedMessages) {
+          channel.deleteMessage(message);
+        }
+      } on Exception catch (e, s) {
+        LogPrint.error(
+          error: e,
+          errorMsg: 'Delete Message Event',
+          stackTrace: s,
+        );
+        CustomFlutterToast.error(
+          message: 'Unable to delete messages',
+        );
+      }
+    });
+    on<SelectOrUnselectMessageEvent>((event, emit) {
+      try {
+        if (event.isClear == null || !event.isClear!) {
+          bool isMessageAlreadyExist =
+              selectedMessages.any((message) => message.id == event.message.id);
+
+          if (isMessageAlreadyExist) {
+            if (!event.isSelect) {
+              selectedMessages
+                  .removeWhere((message) => message.id == event.message.id);
+            }
+          } else {
+            if (event.isSelect) selectedMessages.add(event.message);
+          }
+        } else {
+          selectedMessages.clear();
+        }
+
+        emit(LoadedMessagesState());
+      } on Exception catch (e, s) {
+        LogPrint.error(
+          error: e,
+          errorMsg: 'Select Unselect Message Event',
+          stackTrace: s,
+        );
+      }
+    });
   }
 
   Future<void> _unreadCountHandler(int count) async {
