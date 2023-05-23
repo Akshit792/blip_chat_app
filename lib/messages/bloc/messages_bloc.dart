@@ -131,35 +131,37 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
         }
       },
     );
-    on<SelectOrUnselectMessageEvent>((event, emit) {
-      try {
-        if (event.isClear == null || !event.isClear!) {
-          bool isMessageAlreadyExist =
-              selectedMessages.any((message) => message.id == event.message.id);
+    on<SelectOrUnselectMessageEvent>(
+      (event, emit) {
+        try {
+          if (event.isClear == null || !event.isClear!) {
+            bool isMessageAlreadyExist = selectedMessages
+                .any((message) => message.id == event.message.id);
 
-          if (isMessageAlreadyExist) {
-            if (!event.isSelect) {
-              selectedMessages
-                  .removeWhere((message) => message.id == event.message.id);
+            if (isMessageAlreadyExist) {
+              if (!event.isSelect) {
+                selectedMessages
+                    .removeWhere((message) => message.id == event.message.id);
+              }
+            } else {
+              if (event.message.user!.id != otherUser.userId) {
+                if (event.isSelect) selectedMessages.add(event.message);
+              }
             }
           } else {
-            if (event.message.user!.id != otherUser.userId) {
-              if (event.isSelect) selectedMessages.add(event.message);
-            }
+            selectedMessages.clear();
           }
-        } else {
-          selectedMessages.clear();
-        }
 
-        emit(LoadedMessagesState());
-      } on Exception catch (e, s) {
-        LogPrint.error(
-          error: e,
-          errorMsg: 'Select Unselect Message Event',
-          stackTrace: s,
-        );
-      }
-    });
+          emit(LoadedMessagesState());
+        } on Exception catch (e, s) {
+          LogPrint.error(
+            error: e,
+            errorMsg: 'Select Unselect Message Event',
+            stackTrace: s,
+          );
+        }
+      },
+    );
   }
 
   Future<void> _unreadCountHandler(int count) async {

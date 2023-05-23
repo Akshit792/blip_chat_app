@@ -283,7 +283,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Message Attachments
-                          if (isThereAttachments)
+                          if (messageData.type != "deleted" &&
+                              isThereAttachments)
                             _buildAttachmentsWidget(
                               attachments: messageData.attachments,
                               attachmentType: attachmentType,
