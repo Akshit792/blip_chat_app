@@ -68,7 +68,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       children: [
                         InkWell(
                           onTap: () {
-                            if (selectedMessages.isEmpty) {
+                            if (selectedMessages.isNotEmpty) {
                               BlocProvider.of<MessagesBloc>(context).add(
                                 SelectOrUnselectMessageEvent(
                                   context: context,
@@ -290,7 +290,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                             ),
                           // Message Text
                           Text(
-                            (messageData.text ?? ""),
+                            (messageData.type == "deleted")
+                                ? ("This message was deleted")
+                                : (messageData.text ?? ""),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -304,11 +306,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     ),
                     // Message Sending Status
                     Icon(
-                      messageData.status == MessageSendingStatus.sent
-                          ? Icons.done_all
-                          : messageData.status == MessageSendingStatus.sending
-                              ? Icons.done
-                              : Icons.error,
+                      (messageData.status == MessageSendingStatus.deleting)
+                          ? Icons.delete_outline
+                          : (messageData.status == MessageSendingStatus.sent)
+                              ? Icons.done_all
+                              : (messageData.status ==
+                                      MessageSendingStatus.sending)
+                                  ? Icons.done
+                                  : Icons.error,
                       color: (messageData.status == MessageSendingStatus.sent ||
                               messageData.status ==
                                   MessageSendingStatus.sending)

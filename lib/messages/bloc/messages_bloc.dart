@@ -44,7 +44,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
       (event, emit) async {
         try {
           await channel.sendMessage(event.message);
-          emit(LoadedMessagesState());
+          //       emit(LoadedMessagesState());
         } on Exception catch (e, s) {
           LogPrint.error(
             error: e,
@@ -111,22 +111,26 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
         }
       },
     );
-    on<DeleteMessageEvent>((event, emit) async {
-      try {
-        for (var message in selectedMessages) {
-          channel.deleteMessage(message);
+    on<DeleteMessageEvent>(
+      (event, emit) async {
+        try {
+          for (var message in selectedMessages) {
+            channel.deleteMessage(message, hard: false);
+          }
+          selectedMessages.clear();
+          emit(LoadedMessagesState());
+        } on Exception catch (e, s) {
+          LogPrint.error(
+            error: e,
+            errorMsg: 'Delete Message Event',
+            stackTrace: s,
+          );
+          CustomFlutterToast.error(
+            message: 'Unable to delete messages',
+          );
         }
-      } on Exception catch (e, s) {
-        LogPrint.error(
-          error: e,
-          errorMsg: 'Delete Message Event',
-          stackTrace: s,
-        );
-        CustomFlutterToast.error(
-          message: 'Unable to delete messages',
-        );
-      }
-    });
+      },
+    );
     on<SelectOrUnselectMessageEvent>((event, emit) {
       try {
         if (event.isClear == null || !event.isClear!) {
@@ -139,7 +143,9 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
                   .removeWhere((message) => message.id == event.message.id);
             }
           } else {
-            if (event.isSelect) selectedMessages.add(event.message);
+            if (event.message.user!.id != otherUser.userId) {
+              if (event.isSelect) selectedMessages.add(event.message);
+            }
           }
         } else {
           selectedMessages.clear();
