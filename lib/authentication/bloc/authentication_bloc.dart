@@ -31,16 +31,22 @@ class AuthenticationBloc
 
           if (refreshToken != null) {
             LogPrint.info(infoMsg: "refresh token : $refreshToken");
+
             Auth0Profile user = authRepo.auth0Profile!;
+
+            await authRepo.addUserToFirebaseFirestore(currentUserData: user);
 
             await chatRepo.connectUserToClient(user: user);
 
             homeScreenBloc.selectedIndex = 0;
 
-            Navigator.of(event.context)
-                .pushReplacement(MaterialPageRoute(builder: (context) {
-              return const HomeScreen();
-            }));
+            Navigator.of(event.context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) {
+                  return const HomeScreen();
+                },
+              ),
+            );
           } else {
             // TODO: show an error dialog
           }

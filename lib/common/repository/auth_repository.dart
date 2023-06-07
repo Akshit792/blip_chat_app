@@ -4,6 +4,7 @@ import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/auth0_id_token.dart';
 import 'package:blip_chat_app/common/models/auth0_profile.dart';
 import 'package:blip_chat_app/common/models/logger.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -160,6 +161,46 @@ class AuthRepository {
     // await _appAuth.endSession(endSessionRequest);
     await _secureStorage.delete(key: Constants.accessTokenKey);
     await _secureStorage.delete(key: Constants.refreshTokenKey);
+  }
+
+  Future<void> addUserToFirebaseFirestore(
+      {required Auth0Profile currentUserData}) async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> allUsersDataSnapShot =
+          await FirebaseFirestore.instance.collection('Users').get();
+
+      if (allUsersDataSnapShot.docs.isEmpty) {
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(currentUserData.userId)
+            .set(
+              currentUserData.toJson(),
+            );
+      } else {
+        bool isUserExistsInFirebase = false;
+
+        for (var userDataSnapShot in allUsersDataSnapShot.docs) {
+          Auth0Profile firebaseUser =
+              Auth0Profile.fromJson(userDataSnapShot.data());
+
+          if (firebaseUser.userId == currentUserData.userId) {
+            isUserExistsInFirebase = true;
+            break;
+          }
+        }
+
+        if (!isUserExistsInFirebase) {
+          await FirebaseFirestore.instance
+              .collection('Users')
+              .doc(currentUserData.userId)
+              .set(
+                currentUserData.toJson(),
+              );
+        }
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 }
 
