@@ -1,12 +1,15 @@
 import 'dart:io';
 import 'package:blip_chat_app/authentication/bloc/authentication_bloc.dart';
 import 'package:blip_chat_app/channels/bloc/channels_bloc.dart';
+import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/common/models/context_holder.dart';
+import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:blip_chat_app/common/repository/auth_repository.dart';
 import 'package:blip_chat_app/common/repository/chat_repository.dart';
 import 'package:blip_chat_app/home/bloc/home_screen_bloc.dart';
 import 'package:blip_chat_app/splash/bloc/splash_bloc.dart';
 import 'package:blip_chat_app/splash/splash_screen.dart';
+import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +20,8 @@ void main() async {
   tz.initializeTimeZones();
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  await getAvailableCameras();
 
   if (Platform.isIOS) {
     await Firebase.initializeApp(
@@ -75,6 +80,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-// 1. error dialog box
-// 2. 
+Future<void> getAvailableCameras() async {
+  try {
+    cameras = await availableCameras();
+  } on CameraException catch (e, s) {
+    LogPrint.error(
+      error: e,
+      errorMsg: 'Available Cameras',
+      stackTrace: s,
+    );
+  }
+}

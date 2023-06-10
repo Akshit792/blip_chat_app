@@ -1,6 +1,9 @@
 // ignore_for_file: constant_identifier_names
 
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+
+List<CameraDescription> cameras = [];
 
 enum AuthResultType { success, error }
 

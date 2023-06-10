@@ -6,6 +6,7 @@ import 'package:blip_chat_app/common/helpers.dart';
 import 'package:blip_chat_app/common/widgets/avatar_image_widget.dart';
 import 'package:blip_chat_app/messages/bloc/messages_bloc.dart';
 import 'package:blip_chat_app/messages/messages_screen.dart';
+import 'package:blip_chat_app/stories/add_stories_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -22,7 +23,19 @@ class ChannelsScreen extends StatelessWidget {
       child: Column(
         children: [
           _buildWelcomeUserWidget(context: context),
+          _buildStories(context: context),
           _buildChannelsList(context: context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStories({required BuildContext context}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      child: Row(
+        children: [
+          _buildAddStoriesButton(context: context),
         ],
       ),
     );
@@ -32,7 +45,7 @@ class ChannelsScreen extends StatelessWidget {
     var currentUser = Helpers.getCurrentUser(context: context);
 
     return Padding(
-      padding: const EdgeInsets.only(left: 20, top: 45, right: 20, bottom: 140),
+      padding: const EdgeInsets.only(left: 20, top: 45, right: 20),
       child: Row(
         children: [
           // Intro Text
@@ -92,23 +105,26 @@ class ChannelsScreen extends StatelessWidget {
 
         return Expanded(
           child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30)),
-                color: Colors.grey[100]!,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
               ),
-              child: Column(
-                children: [
-                  _buildTopDivider(),
-                  // Channel list
-                  if (isChannelInitilized)
-                    _pageValueListenableBuilder(
-                        streamChannelListController:
-                            channelsBloc.streamChannelListController!)
-                ],
-              )),
+              color: Colors.grey[100]!,
+            ),
+            child: Column(
+              children: [
+                _buildTopDivider(),
+                // Channel list
+                if (isChannelInitilized)
+                  _pageValueListenableBuilder(
+                    streamChannelListController:
+                        channelsBloc.streamChannelListController!,
+                  )
+              ],
+            ),
+          ),
         );
       },
     );
@@ -369,6 +385,62 @@ class ChannelsScreen extends StatelessWidget {
         });
   }
 
+  Widget _buildAddStoriesButton({required BuildContext context}) {
+    return Material(
+      color: ColorConstants.black,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(50),
+        splashColor: Colors.white.withOpacity(0.5),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return const AddStoriesScreen();
+              },
+            ),
+          );
+        },
+        child: Container(
+          height: 90,
+          width: 90,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: ColorConstants.grey,
+            ),
+            shape: BoxShape.circle,
+          ),
+          child: Ink(
+            height: 78,
+            width: 78,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: ColorConstants.yellow,
+            ),
+            child: Container(
+              height: 78,
+              width: 78,
+              alignment: Alignment.center,
+              child: Container(
+                height: 25,
+                width: 25,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: ColorConstants.black,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.add,
+                  color: ColorConstants.yellow,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTopDivider() {
     return Container(
       height: 7,
@@ -401,8 +473,7 @@ class ChannelsScreen extends StatelessWidget {
   }
 }
 
-
-// cache network image 
+// cache network image
 
 // message by other user
 // not read
