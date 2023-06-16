@@ -18,9 +18,9 @@ class Constants {
   static const rockEmojiIconPlaceHolder = "assets/images/rock_emoji_icon.png";
   static const micIconPlaceholder = "assets/images/mic_icon.png";
 
-  static const STREAM_API_KEY = String.fromEnvironment('STREAM_API_KEY');
-  static const AUTH0_DOMAIN = String.fromEnvironment('AUTH0_DOMAIN');
-  static const AUTH0_CLIENT_ID = String.fromEnvironment('AUTH0_CLIENT_ID');
+  static const STREAM_API_KEY = "gvhj7kveuees";
+  static const AUTH0_DOMAIN = "hasknosiit.us.auth0.com";
+  static const AUTH0_CLIENT_ID = "FJm34RXXXA5yRsRFf0E3rZsEZker4Q4E";
   static const AUTH0_ISSUER = "https://$AUTH0_DOMAIN";
   static const Auth0_BUNDLE_ID = "com.example.blipchatapp";
   static const Auth0_REDIRECT_URL = "$Auth0_BUNDLE_ID://login-callback";
