@@ -31,6 +31,21 @@ class Constants {
   static const refreshTokenKey = "refresh_token";
 
   static const String albumName = 'Media';
+
+  static const List<Map<String, dynamic>> cameraFlashModes = [
+    {
+      'icon': Icons.flash_on,
+      'mode': 'flash_on',
+    },
+    {
+      'icon': Icons.flash_off,
+      'mode': 'flash_off',
+    },
+    {
+      'icon': Icons.flash_auto,
+      'mode': 'flash_auto',
+    }
+  ];
 }
 
 class ColorConstants {

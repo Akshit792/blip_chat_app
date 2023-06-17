@@ -13,11 +13,14 @@ class AddStoriesScreen extends StatefulWidget {
 
 class _AddStoriesScreenState extends State<AddStoriesScreen>
     with WidgetsBindingObserver {
+  final ScrollController _scrollController = ScrollController();
   CameraController? controller;
-  bool _isCameraInitialized = false;
+  FlashMode? _currentFlashMode;
+  bool _isCameraInitialized = false, _isRearCameraSelected = true;
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
   double _currentZoomLevel = 1.0;
+  double turns = 0.0;
 
   @override
   void initState() {
@@ -55,6 +58,22 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
     }
   }
 
+  void _flipCamera() {
+    setState(() {
+      _isCameraInitialized = false;
+    });
+
+    _isRearCameraSelected = !_isRearCameraSelected;
+
+    onNewCameraSelected(
+      cameras[_isRearCameraSelected ? 0 : 1],
+    );
+
+    turns = (turns == 0.0) ? 0.5 : 0.0;
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,12 +90,102 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
                   ),
                 ),
                 Container(
+                  padding: const EdgeInsets.only(top: 5),
+                  margin: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.10,
+                  ),
+                  height: 60,
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        height: 70,
+                        width: 60,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(200),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        height: 70,
+                        width: 60,
+                        alignment: Alignment.center,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: Constants.cameraFlashModes.length,
+                          itemBuilder: (context, index) {
+                            var flashModeData =
+                                Constants.cameraFlashModes[index];
+                            return SizedBox(
+                              height: 50,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(200),
+                                  onTap: () async {
+                                    double jumpIndexValue = index + 1;
+
+                                    if (jumpIndexValue ==
+                                        Constants.cameraFlashModes.length) {
+                                      jumpIndexValue = 0;
+                                    }
+
+                                    if (flashModeData['mode'] == 'flash_on') {
+                                      _currentFlashMode = FlashMode.torch;
+                                    } else if (flashModeData['mode'] ==
+                                        'flash_off') {
+                                      _currentFlashMode = FlashMode.off;
+                                    } else {
+                                      _currentFlashMode = FlashMode.auto;
+                                    }
+
+                                    await controller!.setFlashMode(
+                                      _currentFlashMode ?? FlashMode.off,
+                                    );
+
+                                    final desiredOffset = jumpIndexValue * 50.0;
+
+                                    _scrollController.animateTo(
+                                      desiredOffset,
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      curve: Curves.ease,
+                                    );
+                                  },
+                                  child: Icon(
+                                    flashModeData['icon'],
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
                   height: 100,
                   width: double.infinity,
                   alignment: Alignment.center,
                   margin: EdgeInsets.only(
                     left: 10,
-                    top: MediaQuery.of(context).size.height * 0.76,
+                    top: MediaQuery.of(context).size.height * 0.67,
                     right: 10,
                   ),
                   child: Row(
@@ -113,7 +222,39 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
                       ),
                     ],
                   ),
-                )
+                ),
+                Container(
+                  height: 80,
+                  width: double.infinity,
+                  margin: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.78,
+                  ),
+                  child: Row(
+                    children: [
+                      const Spacer(),
+                      SizedBox(
+                        height: 50,
+                        width: 60,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: AnimatedRotation(
+                            turns: turns,
+                            duration: const Duration(milliseconds: 300),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(200),
+                              onTap: _flipCamera,
+                              child: const Icon(
+                                Icons.flip_camera_android,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             )
           : const SizedBox.shrink(),
@@ -150,6 +291,8 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
           .getMinZoomLevel()
           .then((value) => _minAvailableZoom = value);
 
+      _currentFlashMode = controller!.value.flashMode;
+
       cameraController.addListener(
         () {
           if (mounted) setState(() {});
@@ -172,12 +315,3 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
     }
   }
 }
-
-
-/*
-1. Get all available cameras
-2. setup the CameraController
-3. Handle freeing the memory consumed by the camera in different app lifecycle
-4. Get a full screen view
-5. 
-*/ 
