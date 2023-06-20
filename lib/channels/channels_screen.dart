@@ -7,6 +7,7 @@ import 'package:blip_chat_app/common/widgets/avatar_image_widget.dart';
 import 'package:blip_chat_app/messages/bloc/messages_bloc.dart';
 import 'package:blip_chat_app/messages/messages_screen.dart';
 import 'package:blip_chat_app/stories/add_stories_screen.dart';
+import 'package:blip_chat_app/stories/bloc/stories_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
@@ -395,7 +396,10 @@ class ChannelsScreen extends StatelessWidget {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return const AddStoriesScreen();
+                return BlocProvider(
+                  create: (context) => StoriesBloc(),
+                  child: const AddStoriesScreen(),
+                );
               },
             ),
           );

@@ -17,9 +17,7 @@ class ViewImageBloc extends Bloc<ViewImageEvent, ViewImageState> {
 
           // if (imageId == null) {
           //   CustomFlutterToast.error(message: 'Image is not saved');
-          // }
-
-          // if (imageId != null) {
+          // } else {
           //   var path = await ImageDownloader.findPath(imageId);
 
           //   GallerySaver.saveImage(path ?? "");
