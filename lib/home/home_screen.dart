@@ -19,7 +19,9 @@ class HomeScreen extends StatelessWidget {
           body: SafeArea(
             child: homeScreenBloc.getSelectedScreen(),
           ),
-          bottomNavigationBar: _buildBottomNavigationBar(context: context),
+          bottomNavigationBar: _buildBottomNavigationBar(
+            context: context,
+          ),
         );
       },
     );
@@ -27,33 +29,47 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildBottomNavigationBar({required BuildContext context}) {
     return Container(
-      padding: const EdgeInsets.only(top: 20, bottom: 40),
+      padding: const EdgeInsets.only(
+        top: 20,
+        bottom: 40,
+      ),
       decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey[100]!))),
+        border: Border(
+          top: BorderSide(
+            color: Colors.grey[100]!,
+          ),
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildBottomNavigationBarItem(
-              context: context,
-              iconImage: Constants.messageIconPlaceholder,
-              label: 'Messages',
-              itemIndex: 0),
+            context: context,
+            iconImage: Constants.messageIconPlaceholder,
+            label: 'Messages',
+            itemIndex: 0,
+          ),
           _buildBottomNavigationBarItem(
-              context: context,
-              iconImage: Constants.phoneIconPlaceholder,
-              label: 'Calls',
-              itemIndex: 1),
-          _showUsersButton(context: context),
+            context: context,
+            iconImage: Constants.phoneIconPlaceholder,
+            label: 'Calls',
+            itemIndex: 1,
+          ),
+          _showUsersButton(
+            context: context,
+          ),
           _buildBottomNavigationBarItem(
-              context: context,
-              iconImage: Constants.searchIconPlaceholder,
-              label: 'Search',
-              itemIndex: 2),
+            context: context,
+            iconImage: Constants.searchIconPlaceholder,
+            label: 'Search',
+            itemIndex: 2,
+          ),
           _buildBottomNavigationBarItem(
-              context: context,
-              iconImage: Constants.personIconPlaceholder,
-              label: 'Profile',
-              itemIndex: 3),
+            context: context,
+            iconImage: Constants.personIconPlaceholder,
+            label: 'Profile',
+            itemIndex: 3,
+          ),
         ],
       ),
     );
@@ -71,14 +87,24 @@ class HomeScreen extends StatelessWidget {
     return InkWell(
       onTap: () {
         BlocProvider.of<HomeScreenBloc>(context).add(
-            ChangeScreenBottomNavigationBarEvent(
-                context: context, index: itemIndex));
+          ChangeScreenBottomNavigationBarEvent(
+            context: context,
+            index: itemIndex,
+          ),
+        );
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ImageIcon(AssetImage(iconImage), color: color),
-          const SizedBox(height: 10),
+          ImageIcon(
+            AssetImage(
+              iconImage,
+            ),
+            color: color,
+          ),
+          const SizedBox(
+            height: 10,
+          ),
           Text(
             label,
             style: TextStyle(
@@ -96,7 +122,9 @@ class HomeScreen extends StatelessWidget {
       borderRadius: BorderRadius.circular(50),
       splashColor: Colors.white.withOpacity(0.6),
       onTap: () {
-        _showSelectUsersDialog(context: context);
+        _showSelectUsersDialog(
+          context: context,
+        );
       },
       child: Ink(
         height: 50,
@@ -123,16 +151,18 @@ class HomeScreen extends StatelessWidget {
 
   void _showSelectUsersDialog({required BuildContext context}) {
     showDialog(
-        context: context,
-        builder: (context) {
-          var dialogHeight = MediaQuery.of(context).size.height * 0.4;
-          var dialogWidth = MediaQuery.of(context).size.width * 0.7;
+      context: context,
+      builder: (context) {
+        var dialogHeight = MediaQuery.of(context).size.height * 0.4;
+        var dialogWidth = MediaQuery.of(context).size.width * 0.7;
 
-          return StatefulBuilder(builder: (context, changeState) {
+        return StatefulBuilder(
+          builder: (context, changeState) {
             return AlertDialog(
               insetPadding: const EdgeInsets.all(0),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
               content: SizedBox(
                 height: dialogHeight,
                 width: dialogWidth,
@@ -140,7 +170,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: const [
                     Text(
-                      'Select Member',
+                      ('Select Member'),
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 20,
@@ -154,7 +184,9 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             );
-          });
-        });
+          },
+        );
+      },
+    );
   }
 }

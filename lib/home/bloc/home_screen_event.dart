@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class HomeScreenEvent {}
+abstract class HomeScreenEvent {}
 
 class ChangeScreenBottomNavigationBarEvent extends HomeScreenEvent {
   final BuildContext context;
@@ -15,5 +15,7 @@ class ChangeScreenBottomNavigationBarEvent extends HomeScreenEvent {
 class InitlizeUserListControllerEvent extends HomeScreenEvent {
   final BuildContext context;
 
-  InitlizeUserListControllerEvent({required this.context});
+  InitlizeUserListControllerEvent({
+    required this.context,
+  });
 }

@@ -33,10 +33,15 @@ class ChannelsScreen extends StatelessWidget {
 
   Widget _buildStories({required BuildContext context}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+      padding: const EdgeInsets.symmetric(
+        vertical: 30,
+        horizontal: 20,
+      ),
       child: Row(
         children: [
-          _buildAddStoriesButton(context: context),
+          _buildAddStoriesButton(
+            context: context,
+          ),
         ],
       ),
     );
@@ -46,7 +51,11 @@ class ChannelsScreen extends StatelessWidget {
     var currentUser = Helpers.getCurrentUser(context: context);
 
     return Padding(
-      padding: const EdgeInsets.only(left: 20, top: 45, right: 20),
+      padding: const EdgeInsets.only(
+        left: 20,
+        top: 45,
+        right: 20,
+      ),
       child: Row(
         children: [
           // Intro Text
@@ -57,7 +66,7 @@ class ChannelsScreen extends StatelessWidget {
               text: TextSpan(
                 children: <TextSpan>[
                   const TextSpan(
-                    text: 'Welcome Back, ',
+                    text: ('Welcome Back, '),
                     style: TextStyle(
                       fontSize: 21,
                       fontWeight: FontWeight.w300,
@@ -80,7 +89,9 @@ class ChannelsScreen extends StatelessWidget {
           ),
           // Rock Emoji Icon
           const Image(
-            image: AssetImage(Constants.rockEmojiIconPlaceHolder),
+            image: AssetImage(
+              Constants.rockEmojiIconPlaceHolder,
+            ),
             height: 25,
             fit: BoxFit.contain,
           )
@@ -96,8 +107,9 @@ class ChannelsScreen extends StatelessWidget {
       builder: (context, state) {
         if ((channelsBloc.isChannelListControllerInitilized == null) ||
             (!channelsBloc.isChannelListControllerInitilized!)) {
-          channelsBloc
-              .add(InitilizeChannelListControllerEvent(context: context));
+          channelsBloc.add(
+            InitilizeChannelListControllerEvent(context: context),
+          );
         }
 
         bool isChannelInitilized =
@@ -137,64 +149,64 @@ class ChannelsScreen extends StatelessWidget {
       child: PagedValueListenableBuilder<int, Channel>(
         valueListenable: streamChannelListController,
         builder: (context, value, child) {
-          return value.when((channels, nextPageKey, error) {
-            if (channels.isEmpty) {
-              return _showMessageWidget(message: 'There are no Chats...');
-            }
+          return value.when(
+            (channels, nextPageKey, error) {
+              if (channels.isEmpty) {
+                return _showMessageWidget(message: 'There are no Chats...');
+              }
 
-            return LazyLoadScrollView(
-              onEndOfPage: () async {
-                // TODO: BLOC
-                if (nextPageKey != null) {
-                  streamChannelListController.loadMore(nextPageKey);
-                }
-              },
-              child: ListView.builder(
-                itemCount: (nextPageKey != null || error != null)
-                    ? channels.length + 1
-                    : channels.length,
-                itemBuilder: (BuildContext context, int index) {
-                  if (index == channels.length) {
-                    if (error != null) {
-                      return TextButton(
-                        onPressed: () {
-                          //TODO: BLOC
-                          streamChannelListController.retry();
-                        },
-                        child: Text(error.message),
-                      );
+              return LazyLoadScrollView(
+                onEndOfPage: () async {
+                  if (nextPageKey != null) {
+                    streamChannelListController.loadMore(nextPageKey);
+                  }
+                },
+                child: ListView.builder(
+                  itemCount: (nextPageKey != null || error != null)
+                      ? channels.length + 1
+                      : channels.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == channels.length) {
+                      if (error != null) {
+                        return TextButton(
+                          onPressed: () {
+                            streamChannelListController.retry();
+                          },
+                          child: Text(error.message),
+                        );
+                      }
+
+                      return _circularLoadingInidicator();
                     }
 
-                    return const CircularProgressIndicator.adaptive(
-                      strokeWidth: 2.5,
+                    final Channel channelData = channels[index];
+                    final currentUser =
+                        Helpers.getCurrentUser(context: context);
+
+                    List<Member> members = [];
+                    Member otherUser = Member();
+
+                    if (channelData.state != null) {
+                      members = channelData.state!.members;
+                      otherUser = members.firstWhere(
+                          (memberData) => memberData.userId != currentUser.id);
+                    }
+
+                    return _buildChannelItemListTile(
+                      context: context,
+                      channelData: channelData,
+                      otherUser: otherUser,
+                      currentUser: currentUser,
                     );
-                  }
-
-                  final Channel channelData = channels[index];
-                  final currentUser = Helpers.getCurrentUser(context: context);
-
-                  List<Member> members = [];
-                  Member otherUser = Member();
-
-                  if (channelData.state != null) {
-                    members = channelData.state!.members;
-                    otherUser = members.firstWhere(
-                        (memberData) => memberData.userId != currentUser.id);
-                  }
-
-                  return _buildChannelItemListTile(
-                    context: context,
-                    channelData: channelData,
-                    otherUser: otherUser,
-                    currentUser: currentUser,
-                  );
-                },
-              ),
-            );
-          },
-              loading: () => _circularLoadingInidicator(),
-              error: (e) =>
-                  _showMessageWidget(message: 'Oh no, something went wrong.'));
+                  },
+                ),
+              );
+            },
+            loading: () => _circularLoadingInidicator(),
+            error: (e) => _showMessageWidget(
+              message: ('Oh no, something went wrong.'),
+            ),
+          );
         },
       ),
     );

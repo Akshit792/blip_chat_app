@@ -22,18 +22,20 @@ class HomeScreenBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
   ];
 
   HomeScreenBloc() : super(InitialHomeState()) {
-    on<ChangeScreenBottomNavigationBarEvent>((event, emit) {
-      try {
-        selectedIndex = event.index;
-        emit(UpdatePageState());
-      } on Exception catch (e, s) {
-        LogPrint.error(
-          errorMsg: 'Change Screen Bottom Navigation Bar Event',
-          error: e,
-          stackTrace: s,
-        );
-      }
-    });
+    on<ChangeScreenBottomNavigationBarEvent>(
+      (event, emit) {
+        try {
+          selectedIndex = event.index;
+          emit(UpdatePageState());
+        } on Exception catch (e, s) {
+          LogPrint.error(
+            errorMsg: ('Change Screen Bottom Navigation Bar Event'),
+            error: e,
+            stackTrace: s,
+          );
+        }
+      },
+    );
   }
 
   Widget getSelectedScreen() {

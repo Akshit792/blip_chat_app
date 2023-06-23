@@ -26,7 +26,7 @@ class ChannelsBloc extends Bloc<ChannelsEvent, ChannelsState> {
           emit(LoadedChannelState());
         } on Exception catch (e, s) {
           LogPrint.error(
-            errorMsg: 'Initilise Channel List Controller',
+            errorMsg: ('Initilise Channel List Controller'),
             error: e,
             stackTrace: s,
           );

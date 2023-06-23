@@ -16,46 +16,56 @@ import 'package:blip_chat_app/authentication/bloc/authentication_state.dart';
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   AuthenticationBloc() : super(InitialAuthenticationState()) {
-    on<AuthenticationLoginEvent>((event, emit) async {
-      try {
-        emit(LoadingAuthenticationState());
+    on<AuthenticationLoginEvent>(
+      (event, emit) async {
+        try {
+          emit(LoadingAuthenticationState());
 
-        var chatRepo = RepositoryProvider.of<ChatRepository>(event.context);
-        var authRepo = RepositoryProvider.of<AuthRepository>(event.context);
-        var homeScreenBloc = BlocProvider.of<HomeScreenBloc>(event.context);
-        AuthResultType authResultType = await authRepo.loginAction();
+          var chatRepo = RepositoryProvider.of<ChatRepository>(event.context);
+          var authRepo = RepositoryProvider.of<AuthRepository>(event.context);
+          var homeScreenBloc = BlocProvider.of<HomeScreenBloc>(event.context);
 
-        if (authResultType == AuthResultType.success) {
-          var refreshToken =
-              Helpers.getToken(tokenType: Constants.refreshTokenKey);
+          AuthResultType authResultType = await authRepo.loginAction();
 
-          if (refreshToken != null) {
-            LogPrint.info(infoMsg: "refresh token : $refreshToken");
-
-            Auth0Profile user = authRepo.auth0Profile!;
-
-            await authRepo.addUserToFirebaseFirestore(currentUserData: user);
-
-            await chatRepo.connectUserToClient(user: user);
-
-            homeScreenBloc.selectedIndex = 0;
-
-            Navigator.of(event.context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) {
-                  return const HomeScreen();
-                },
-              ),
+          if (authResultType == AuthResultType.success) {
+            var refreshToken = Helpers.getToken(
+              tokenType: Constants.refreshTokenKey,
             );
-          } else {
-            // TODO: show an error dialog
+
+            if (refreshToken != null) {
+              Auth0Profile user = authRepo.auth0Profile!;
+
+              await authRepo.addUserToFirebaseFirestore(
+                currentUserData: user,
+              );
+
+              await chatRepo.connectUserToClient(
+                user: user,
+              );
+
+              homeScreenBloc.selectedIndex = 0;
+
+              Navigator.of(event.context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return const HomeScreen();
+                  },
+                ),
+              );
+            } else {
+              CustomFlutterToast.error(message: 'Login Failed');
+            }
           }
+          emit(LoadedAuthenticationState());
+        } on Exception catch (e, s) {
+          CustomFlutterToast.error(message: 'Login Failed');
+          LogPrint.error(
+            errorMsg: "Authentication Login Event",
+            error: e,
+            stackTrace: s,
+          );
         }
-        emit(LoadedAuthenticationState());
-      } on Exception catch (e, s) {
-        LogPrint.error(
-            errorMsg: "Authentication Login Event", error: e, stackTrace: s);
-      }
-    });
+      },
+    );
   }
 }

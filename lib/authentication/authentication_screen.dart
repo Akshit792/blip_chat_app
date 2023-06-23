@@ -20,6 +20,8 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
       builder: (context, state) {
         return Scaffold(
           body: ListView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             children: [
               _buildAuthScreenImage(screenHeight),
               _buildLogoTextAndLoginButton(
@@ -35,7 +37,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
 
   Widget _buildAuthScreenImage(dynamic screenHeight) {
     return Container(
-      height: screenHeight * 0.5,
+      height: (screenHeight * 0.5),
       color: const Color.fromRGBO(255, 203, 65, 1),
       alignment: Alignment.bottomCenter,
       child: Image.asset(Constants.personImagePlaceHolder),
@@ -56,7 +58,7 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
             height: 50,
           ),
           const Text(
-            'Stay connected with your friends and family',
+            ('Stay connected with your friends and family'),
             style: TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
@@ -68,12 +70,14 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
           ),
           Row(
             children: [
-              Image.asset(Constants.securityCheckPlaceHolder),
+              Image.asset(
+                Constants.securityCheckPlaceHolder,
+              ),
               const SizedBox(
                 width: 15,
               ),
               const Text(
-                'Secure, private messaging',
+                ('Secure, private messaging'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -88,15 +92,19 @@ class _AuthenticationScreenState extends State<AuthenticationScreen> {
           MaterialButton(
             color: Colors.white,
             minWidth: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+            padding: const EdgeInsets.symmetric(
+              vertical: 20,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50),
+            ),
             onPressed: () {
-              BlocProvider.of<AuthenticationBloc>(context)
-                  .add(AuthenticationLoginEvent(context: context));
+              BlocProvider.of<AuthenticationBloc>(context).add(
+                AuthenticationLoginEvent(context: context),
+              );
             },
             child: const Text(
-              'SignIn/SignUp',
+              ('SignIn/SignUp'),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,

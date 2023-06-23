@@ -5,5 +5,7 @@ abstract class SplashEvent {}
 class CheckAuthStatusSplashEvent extends SplashEvent {
   final BuildContext context;
 
-  CheckAuthStatusSplashEvent({required this.context});
+  CheckAuthStatusSplashEvent({
+    required this.context,
+  });
 }

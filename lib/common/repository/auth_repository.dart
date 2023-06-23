@@ -59,7 +59,6 @@ class AuthRepository {
           await _secureStorage.read(key: Constants.refreshTokenKey);
 
       if (secureRefreshToken == null) {
-        LogPrint.info(infoMsg: "Token Revalidation Failed");
         return AuthResultType.error;
       }
 
@@ -77,7 +76,6 @@ class AuthRepository {
 
       return result;
     } catch (e, s) {
-      LogPrint.info(infoMsg: "Token Revalidation Failed");
       LogPrint.error(
         errorMsg: "Revalidate User",
         error: e,
@@ -166,14 +164,14 @@ class AuthRepository {
   Future<void> addUserToFirebaseFirestore(
       {required Auth0Profile currentUserData}) async {
     try {
+      var userCollectionRefrence =
+          FirebaseFirestore.instance.collection('Users');
+
       QuerySnapshot<Map<String, dynamic>> allUsersDataSnapShot =
-          await FirebaseFirestore.instance.collection('Users').get();
+          await userCollectionRefrence.get();
 
       if (allUsersDataSnapShot.docs.isEmpty) {
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(currentUserData.userId)
-            .set(
+        await userCollectionRefrence.doc(currentUserData.userId).set(
               currentUserData.toJson(),
             );
       } else {
@@ -190,10 +188,7 @@ class AuthRepository {
         }
 
         if (!isUserExistsInFirebase) {
-          await FirebaseFirestore.instance
-              .collection('Users')
-              .doc(currentUserData.userId)
-              .set(
+          await userCollectionRefrence.doc(currentUserData.userId).set(
                 currentUserData.toJson(),
               );
         }

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:blip_chat_app/common/constants.dart';
 import 'package:blip_chat_app/stories/bloc/stories_bloc.dart';
 import 'package:blip_chat_app/stories/bloc/stories_event.dart';
@@ -21,6 +23,7 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
   bool _isPhotoMode = true;
   late StoriesBloc storiesBloc;
   double turns = 0.0;
+  bool isCaptureButtonPressed = false;
 
   @override
   void initState() {
@@ -106,7 +109,7 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
                     color: ColorConstants.black,
                     alignment: Alignment.center,
                     child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.8,
+                      height: MediaQuery.of(context).size.height * 0.75,
                       width: double.infinity,
                       child: storiesBloc.controller!.buildPreview(),
                     ),
@@ -115,7 +118,7 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
             Container(
               padding: const EdgeInsets.only(top: 5),
               margin: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height * 0.10,
+                top: MediaQuery.of(context).size.height * 0.14,
               ),
               height: 60,
               width: double.infinity,
@@ -210,7 +213,7 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
               alignment: Alignment.center,
               margin: EdgeInsets.only(
                 left: 10,
-                top: MediaQuery.of(context).size.height * 0.67,
+                top: MediaQuery.of(context).size.height * 0.65,
                 right: 10,
               ),
               child: Row(
@@ -252,11 +255,58 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
               height: 80,
               width: double.infinity,
               margin: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height * 0.78,
+                top: MediaQuery.of(context).size.height * 0.75,
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Spacer(),
+                  const SizedBox(width: 60),
+                  InkWell(
+                    onTap: () async {
+                      isCaptureButtonPressed = true;
+                      setState(() {});
+
+                      await Future.delayed(
+                        const Duration(
+                          milliseconds: 200,
+                        ),
+                      );
+
+                      isCaptureButtonPressed = false;
+                      setState(() {});
+
+                      storiesBloc.add(
+                        TakePictureEvent(context: context),
+                      );
+                    },
+                    child: AnimatedContainer(
+                      height: isCaptureButtonPressed ? 80 : 70,
+                      width: isCaptureButtonPressed ? 80 : 70,
+                      curve: Curves.easeIn,
+                      duration: const Duration(
+                        milliseconds: 200,
+                      ),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          width: 4.0,
+                          color: Colors.white,
+                        ),
+                      ),
+                      child: AnimatedContainer(
+                        height: isCaptureButtonPressed ? 70 : 50,
+                        width: isCaptureButtonPressed ? 70 : 50,
+                        margin: const EdgeInsets.all(8),
+                        duration: const Duration(
+                          milliseconds: 200,
+                        ),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
                   SizedBox(
                     height: 50,
                     width: 60,
@@ -382,7 +432,7 @@ class _AddStoriesScreenState extends State<AddStoriesScreen>
       alignment: Alignment.center,
       color: Colors.black,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.8,
+        height: MediaQuery.of(context).size.height * 0.75,
         width: double.infinity,
         color: ColorConstants.grey.withOpacity(0.1),
       ),

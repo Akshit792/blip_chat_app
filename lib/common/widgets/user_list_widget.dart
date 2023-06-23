@@ -37,7 +37,9 @@ class _UsersListWidgetState extends State<UsersListWidget> {
     return (isLoading && !isError)
         ? _circularLoadingInidicator()
         : (isError)
-            ? _showMessageWidget(message: ('Oh no, something went wrong.'))
+            ? _showMessageWidget(
+                message: ('Oh no, something went wrong.'),
+              )
             : Expanded(
                 child: PagedValueListenableBuilder<int, User>(
                   valueListenable: _userListController,
@@ -46,11 +48,14 @@ class _UsersListWidgetState extends State<UsersListWidget> {
                       (users, nextPageKey, error) {
                         if (users.isEmpty) {
                           return _showMessageWidget(
-                              message: ('There are no users'));
+                            message: ('There are no users'),
+                          );
                         }
                         return LazyLoadScrollView(
                           onEndOfPage: () async {
-                            _loadMoreUsers(nextPageKey: nextPageKey);
+                            _loadMoreUsers(
+                              nextPageKey: nextPageKey,
+                            );
                           },
                           child: ListView.builder(
                             itemCount: (nextPageKey != null || error != null)
@@ -73,21 +78,23 @@ class _UsersListWidgetState extends State<UsersListWidget> {
 
                               final userData = users[index];
 
-                              return _buildUserDetailsTile(userData: userData);
+                              return _buildUserDetailsTile(
+                                userData: userData,
+                              );
                             },
                           ),
                         );
                       },
                       loading: () => _circularLoadingInidicator(),
                       error: (e) => _showMessageWidget(
-                          message: ('Oh no, something went wrong.')),
+                        message: ('Oh no, something went wrong.'),
+                      ),
                     );
                   },
                 ),
               );
   }
 
-//TODO: USE CACHE NETWORK IMAGE
   Widget _buildUserDetailsTile({required User userData}) {
     return Column(
       children: [
@@ -100,9 +107,11 @@ class _UsersListWidgetState extends State<UsersListWidget> {
             height: 50,
             width: 50,
             decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image:
-                    DecorationImage(image: NetworkImage(userData.image ?? ""))),
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                image: NetworkImage(userData.image ?? ""),
+              ),
+            ),
           ),
           title: Text(
             userData.name,
@@ -113,7 +122,10 @@ class _UsersListWidgetState extends State<UsersListWidget> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 15,
+          ),
           child: Container(
             height: 1,
             color: Colors.grey[300],
@@ -126,13 +138,14 @@ class _UsersListWidgetState extends State<UsersListWidget> {
   Widget _circularLoadingInidicator() {
     return const Expanded(
       child: Center(
-          child: SizedBox(
-        height: 30,
-        width: 30,
-        child: CircularProgressIndicator.adaptive(
-          strokeWidth: 2.5,
+        child: SizedBox(
+          height: 30,
+          width: 30,
+          child: CircularProgressIndicator.adaptive(
+            strokeWidth: 2.5,
+          ),
         ),
-      )),
+      ),
     );
   }
 
@@ -179,10 +192,17 @@ class _UsersListWidgetState extends State<UsersListWidget> {
           userId: userId, context: context);
 
       BlocProvider.of<HomeScreenBloc>(context).add(
-          ChangeScreenBottomNavigationBarEvent(context: context, index: 0));
+        ChangeScreenBottomNavigationBarEvent(
+          context: context,
+          index: 0,
+        ),
+      );
     } on Exception catch (e, s) {
       LogPrint.error(
-          error: e, errorMsg: 'Create Channel User List Page', stackTrace: s);
+        error: e,
+        errorMsg: ('Create Channel User List Page'),
+        stackTrace: s,
+      );
     }
   }
 }

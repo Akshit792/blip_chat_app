@@ -52,8 +52,11 @@ class ViewImageScreen extends StatelessWidget {
               ],
               backgroundColor: ColorConstants.yellow,
             ),
-            body:
-                _buildPhotoViewGallery(context: context, imagesUrl: imagesUrl));
+            body: _buildPhotoViewGallery(
+              context: context,
+              imagesUrl: imagesUrl,
+              isImageTypeNetwork: viewImageBloc.isImageTypeNetwork,
+            ));
       },
     );
   }
@@ -61,14 +64,17 @@ class ViewImageScreen extends StatelessWidget {
   _buildPhotoViewGallery({
     required BuildContext context,
     required List<String> imagesUrl,
+    required bool isImageTypeNetwork,
   }) {
     return PhotoViewGallery.builder(
       itemCount: imagesUrl.length,
       builder: (context, index) {
         return PhotoViewGalleryPageOptions(
-          imageProvider: NetworkImage(
-            imagesUrl[index],
-          ),
+          imageProvider: isImageTypeNetwork
+              ? NetworkImage(
+                  imagesUrl[index],
+                )
+              : AssetImage(imagesUrl[index]) as ImageProvider,
           minScale: PhotoViewComputedScale.contained * 0.8,
           maxScale: PhotoViewComputedScale.covered * 2,
         );

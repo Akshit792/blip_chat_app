@@ -45,7 +45,7 @@ class ChatRepository {
       client: client,
       filter: filters,
       channelStateSort: channelSort,
-      limit: 20,
+      limit: 10,
     );
 
     return streamChannelListController;

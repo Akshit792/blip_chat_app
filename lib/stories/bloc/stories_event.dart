@@ -42,3 +42,11 @@ class ChangeCameraZoomLevelEvent extends StoriesEvent {
     required this.zoomLevel,
   });
 }
+
+class TakePictureEvent extends StoriesEvent {
+  final BuildContext context;
+
+  TakePictureEvent({
+    required this.context,
+  });
+}

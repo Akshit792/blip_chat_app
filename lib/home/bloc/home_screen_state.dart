@@ -1,4 +1,4 @@
-class HomeScreenState {}
+abstract class HomeScreenState {}
 
 class InitialHomeState extends HomeScreenState {}
 

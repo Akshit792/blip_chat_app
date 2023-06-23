@@ -8,8 +8,12 @@ import 'package:gallery_saver/gallery_saver.dart';
 class ViewImageBloc extends Bloc<ViewImageEvent, ViewImageState> {
   final List<String> imagesUrl;
   String currentImagePath = "";
+  bool isImageTypeNetwork;
 
-  ViewImageBloc({required this.imagesUrl}) : super(InitialViewImageState()) {
+  ViewImageBloc({
+    required this.imagesUrl,
+    this.isImageTypeNetwork = true,
+  }) : super(InitialViewImageState()) {
     on<SaveImageToGalleryViewImageEvent>(
       (event, emit) async {
         try {

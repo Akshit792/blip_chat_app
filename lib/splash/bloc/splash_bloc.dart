@@ -17,7 +17,6 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     on<CheckAuthStatusSplashEvent>((event, emit) async {
       try {
         emit(AuthStatusLoadingSplashState());
-        LogPrint.info(infoMsg: 'ReValidating User');
 
         var chatRepo = RepositoryProvider.of<ChatRepository>(event.context);
         var authRepo = RepositoryProvider.of<AuthRepository>(event.context);
@@ -26,20 +25,23 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
         if (tokenReValidationStatus == AuthResultType.success) {
           Auth0Profile user = authRepo.auth0Profile!;
-
           await chatRepo.connectUserToClient(user: user);
         }
 
-        Navigator.of(event.context)
-            .pushReplacement(MaterialPageRoute(builder: (context) {
-          return tokenReValidationStatus == AuthResultType.success
-              ? const HomeScreen()
-              : const AuthenticationScreen();
-        }));
+        Navigator.of(event.context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) {
+              return (tokenReValidationStatus == AuthResultType.success)
+                  ? const HomeScreen()
+                  : const AuthenticationScreen();
+            },
+          ),
+        );
+
         emit(AuthStatusLoadedSplashState());
       } catch (e, s) {
         LogPrint.error(
-          errorMsg: "Check Token Splash State",
+          errorMsg: ("Check Token Splash State"),
           error: e,
           stackTrace: s,
         );
