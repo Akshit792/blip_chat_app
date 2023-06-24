@@ -62,7 +62,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   // User Details
                   Container(
                     padding: const EdgeInsets.only(
-                        left: 15, top: 15, right: 20, bottom: 25),
+                      left: 15,
+                      top: 15,
+                      right: 20,
+                      bottom: 25,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -83,7 +87,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
                             }
                           },
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 0, right: 15),
+                            padding: const EdgeInsets.only(
+                              left: 0,
+                              right: 15,
+                            ),
                             child: Icon(
                               (selectedMessages.isNotEmpty)
                                   ? Icons.close
@@ -330,8 +337,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 // Message Date Time
                 Padding(
                   padding: EdgeInsets.only(
-                      left: isThisCurrentUser ? 0 : 4,
-                      right: isThisCurrentUser ? 4 : 0),
+                    left: isThisCurrentUser ? 0 : 4,
+                    right: isThisCurrentUser ? 4 : 0,
+                  ),
                   child: Text(
                     Helpers.getTimeStringFromDateTime(
                         dateTime: messageData.createdAt),
@@ -385,13 +393,15 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
                 decoration: InputDecoration(
-                  hintText: 'Type Message',
+                  hintText: ('Type Message'),
                   hintStyle: const TextStyle(
                     color: ColorConstants.grey,
                     fontWeight: FontWeight.w500,
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 25,
+                    vertical: 20,
+                  ),
                   border: InputBorder.none,
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
@@ -524,7 +534,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       for (var attachmentData in attachments) {
                         if (Helpers.isStringValid(
                             text: attachmentData.imageUrl)) {
-                          imageUrls.add(attachmentData.imageUrl ?? "");
+                          imageUrls.add(
+                            attachmentData.imageUrl ?? "",
+                          );
                         }
                       }
 
@@ -532,8 +544,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         MaterialPageRoute(
                           builder: (context) {
                             return BlocProvider(
-                              create: (BuildContext context) =>
-                                  ViewImageBloc(imagesUrl: imageUrls),
+                              create: (BuildContext context) => ViewImageBloc(
+                                imagesUrl: imageUrls,
+                              ),
                               child: const ViewImageScreen(),
                             );
                           },

@@ -44,7 +44,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
       (event, emit) async {
         try {
           await channel.sendMessage(event.message);
-          //       emit(LoadedMessagesState());
         } on Exception catch (e, s) {
           LogPrint.error(
             error: e,

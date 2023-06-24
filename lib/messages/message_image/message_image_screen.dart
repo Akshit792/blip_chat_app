@@ -55,18 +55,19 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
             ),
             actions: [
               IconButton(
-                  onPressed: () {
-                    messageImageBloc.add(
-                      CropSelectedImageEvent(
-                        context: context,
-                        imageFile: imagesList[selectedImageIndex],
-                      ),
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.crop,
-                    color: ColorConstants.black,
-                  )),
+                onPressed: () {
+                  messageImageBloc.add(
+                    CropSelectedImageEvent(
+                      context: context,
+                      imageFile: imagesList[selectedImageIndex],
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.crop,
+                  color: ColorConstants.black,
+                ),
+              ),
               const SizedBox(
                 width: 20,
               ),
@@ -76,7 +77,9 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
             height: double.infinity,
             width: double.infinity,
             color: ColorConstants.black,
-            padding: const EdgeInsets.symmetric(vertical: 40),
+            padding: const EdgeInsets.symmetric(
+              vertical: 40,
+            ),
             child: (imagesList.isNotEmpty)
                 ? Stack(
                     children: [
@@ -97,7 +100,9 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                             height: 60,
                             width: double.infinity,
                             color: Colors.grey.withOpacity(0.15),
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                            ),
                             child: ListView.builder(
                                 itemCount: imagesList.length,
                                 scrollDirection: Axis.horizontal,
@@ -106,8 +111,9 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                     onTap: () {
                                       messageImageBloc.add(
                                         ChangeSelectedImageEvent(
-                                            context: context,
-                                            currentIndex: index),
+                                          context: context,
+                                          currentIndex: index,
+                                        ),
                                       );
                                     },
                                     child: Container(
@@ -117,7 +123,8 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                       decoration: BoxDecoration(
                                         border: (selectedImageIndex == index)
                                             ? Border.all(
-                                                color: ColorConstants.yellow)
+                                                color: ColorConstants.yellow,
+                                              )
                                             : null,
                                       ),
                                       child: Image(
@@ -131,7 +138,9 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                 }),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 45),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 45,
+                            ),
                             child: Row(
                               children: [
                                 const SizedBox(
@@ -180,7 +189,9 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                 )),
                                 Padding(
                                   padding: const EdgeInsets.only(
-                                      left: 20, right: 10),
+                                    left: 20,
+                                    right: 10,
+                                  ),
                                   child: Material(
                                     type: MaterialType.circle,
                                     color: ColorConstants.yellow,
@@ -191,8 +202,9 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                             is! SendingMessageImageState) {
                                           messageImageBloc.add(
                                             SendMessageImageAttachmentEvent(
-                                                context: context,
-                                                captionText: captionText),
+                                              context: context,
+                                              captionText: captionText,
+                                            ),
                                           );
                                         }
                                       },
@@ -203,23 +215,27 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                         decoration: const BoxDecoration(
                                           shape: BoxShape.circle,
                                         ),
-                                        child: (state
-                                                is SendingMessageImageState)
-                                            ? Container(
-                                                height: 30,
-                                                width: 30,
-                                                alignment: Alignment.center,
-                                                child:
-                                                    const CircularProgressIndicator
-                                                        .adaptive(
-                                                  backgroundColor: Colors.white,
-                                                ),
-                                              )
-                                            : const Icon(
-                                                Icons.send,
-                                                color: Colors.black,
-                                                size: 20,
-                                              ),
+                                        child:
+                                            (state is SendingMessageImageState)
+                                                ? Container(
+                                                    height: 30,
+                                                    width: 30,
+                                                    alignment: Alignment.center,
+                                                    child:
+                                                        const CircularProgressIndicator
+                                                            .adaptive(
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                              Color>(
+                                                        Colors.white,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : const Icon(
+                                                    Icons.send,
+                                                    color: Colors.black,
+                                                    size: 20,
+                                                  ),
                                       ),
                                     ),
                                   ),

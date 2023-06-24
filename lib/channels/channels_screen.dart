@@ -266,7 +266,10 @@ class ChannelsScreen extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 18,
+            vertical: 15,
+          ),
           child: Container(
             height: 1,
             color: Colors.grey[300],
@@ -284,118 +287,123 @@ class ChannelsScreen extends StatelessWidget {
     ChannelClientState? channelDataState = channel!.state;
 
     return StreamBuilder<Object>(
-        stream: channelDataState!.unreadCountStream,
-        initialData: channelDataState.unreadCount,
-        builder: (context, snapshot) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: StreamBuilder<Message?>(
-              stream: channelDataState.lastMessageStream,
-              initialData: channelDataState.lastMessage,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    snapshot.hasError) {
-                  return const Text(
-                    'No messages yet...',
-                    style: TextStyle(
-                      color: ColorConstants.grey,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                    ),
-                  );
-                }
-
-                if (snapshot.hasData) {
-                  Message lastMessageData = snapshot.data!;
-
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          lastMessageData.text ?? "",
-                          style: TextStyle(
-                            color: (channelDataState.unreadCount > 0)
-                                ? ColorConstants.black
-                                : ColorConstants.grey,
-                            fontWeight: (channelDataState.unreadCount > 0)
-                                ? FontWeight.w600
-                                : null,
-                          ),
-                        ),
-                      ),
-                      _buildUnreadCount(channelDataState: channelDataState),
-                    ],
-                  );
-                }
-
+      stream: channelDataState!.unreadCountStream,
+      initialData: channelDataState.unreadCount,
+      builder: (context, snapshot) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: StreamBuilder<Message?>(
+            stream: channelDataState.lastMessageStream,
+            initialData: channelDataState.lastMessage,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting ||
+                  snapshot.hasError) {
                 return const Text(
-                  'No messages yet...',
+                  ('No messages yet...'),
                   style: TextStyle(
                     color: ColorConstants.grey,
                     fontWeight: FontWeight.w500,
                     fontSize: 15,
                   ),
                 );
-              },
-            ),
-          );
-        });
+              }
+
+              if (snapshot.hasData) {
+                Message lastMessageData = snapshot.data!;
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        (lastMessageData.text ?? ""),
+                        style: TextStyle(
+                          color: (channelDataState.unreadCount > 0)
+                              ? ColorConstants.black
+                              : ColorConstants.grey,
+                          fontWeight: (channelDataState.unreadCount > 0)
+                              ? FontWeight.w600
+                              : null,
+                        ),
+                      ),
+                    ),
+                    _buildUnreadCount(channelDataState: channelDataState),
+                  ],
+                );
+              }
+
+              return const Text(
+                'No messages yet...',
+                style: TextStyle(
+                  color: ColorConstants.grey,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   _buildLastMessageAt({required Channel channelData}) {
     return StreamBuilder<DateTime?>(
-        stream: channelData.lastMessageAtStream,
-        initialData: channelData.lastMessageAt,
-        builder: (context, snapShot) {
-          var lastMessageAt = snapShot.data;
+      stream: channelData.lastMessageAtStream,
+      initialData: channelData.lastMessageAt,
+      builder: (context, snapShot) {
+        var lastMessageAt = snapShot.data;
 
-          return SizedBox(
-            width: 70,
-            child: Text(
-              (lastMessageAt == null)
-                  ? ""
-                  : Helpers.getTimeStringFromDateTime(dateTime: snapShot.data!),
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                color: ColorConstants.grey,
-                fontSize: 15,
-              ),
+        return SizedBox(
+          width: 70,
+          child: Text(
+            (lastMessageAt == null)
+                ? ""
+                : Helpers.getTimeStringFromDateTime(dateTime: snapShot.data!),
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: ColorConstants.grey,
+              fontSize: 15,
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   _buildUnreadCount({required ChannelClientState channelDataState}) {
     return StreamBuilder(
-        stream: channelDataState.unreadCountStream,
-        initialData: channelDataState.unreadCount,
-        builder: (context, snapShot) {
-          if (snapShot.hasData) {
-            var unreadCount = snapShot.data!;
+      stream: channelDataState.unreadCountStream,
+      initialData: channelDataState.unreadCount,
+      builder: (context, snapShot) {
+        if (snapShot.hasData) {
+          var unreadCount = snapShot.data!;
 
-            return Container(
-              padding: const EdgeInsets.all(8),
-              margin: const EdgeInsets.only(left: 10, right: 11),
-              decoration: BoxDecoration(
-                color: (unreadCount > 0)
-                    ? ColorConstants.yellow
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                (unreadCount > 0)
-                    ? channelDataState.unreadCount.toString()
-                    : '',
-                style: const TextStyle(
-                  color: ColorConstants.black,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            );
+          if (unreadCount == 0) {
+            return const SizedBox.shrink();
           }
-          return const SizedBox.shrink();
-        });
+
+          return Container(
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.only(left: 10, right: 11),
+            decoration: BoxDecoration(
+              color: (unreadCount > 0)
+                  ? ColorConstants.yellow
+                  : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              (unreadCount > 0) ? channelDataState.unreadCount.toString() : '',
+              style: const TextStyle(
+                color: ColorConstants.black,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
   }
 
   Widget _buildAddStoriesButton({required BuildContext context}) {
@@ -472,13 +480,14 @@ class ChannelsScreen extends StatelessWidget {
   Widget _circularLoadingInidicator() {
     return const Expanded(
       child: Center(
-          child: SizedBox(
-        height: 30,
-        width: 30,
-        child: CircularProgressIndicator.adaptive(
-          strokeWidth: 2.5,
+        child: SizedBox(
+          height: 30,
+          width: 30,
+          child: CircularProgressIndicator.adaptive(
+            strokeWidth: 2.5,
+          ),
         ),
-      )),
+      ),
     );
   }
 
@@ -488,8 +497,3 @@ class ChannelsScreen extends StatelessWidget {
     );
   }
 }
-
-// cache network image
-
-// message by other user
-// not read
