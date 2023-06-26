@@ -12,7 +12,9 @@ import 'package:blip_chat_app/view_images/bloc/view_images_bloc.dart';
 import 'package:blip_chat_app/view_images/view_images_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -229,6 +231,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
             : "";
 
         return InkWell(
+          onTapDown: (_) {
+            print('on tap down');
+          },
+          onTapUp: (_) {
+            print('on tap up');
+          },
           onLongPress: () {
             BlocProvider.of<MessagesBloc>(context).add(
               SelectOrUnselectMessageEvent(
@@ -249,14 +257,19 @@ class _MessagesScreenState extends State<MessagesScreen> {
           },
           child: Container(
             width: MediaQuery.of(context).size.height * 0.4,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 10,
+            ),
             decoration: BoxDecoration(
-              border: (selectedMessages
-                      .any((message) => message.id == messageData.id))
+              border: (selectedMessages.any(
+                (message) => message.id == messageData.id,
+              ))
                   ? Border.all(width: 0.05)
                   : null,
-              color: (selectedMessages
-                      .any((message) => message.id == messageData.id))
+              color: (selectedMessages.any(
+                (message) => message.id == messageData.id,
+              ))
                   ? Colors.yellow[50]
                   : null,
             ),
@@ -273,13 +286,17 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   children: [
                     Container(
                       width: 200,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 20,
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        top: 20,
+                        right: 20,
+                        bottom: 12,
                       ),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.yellow[200]!,
+                          color: (isThisCurrentUser)
+                              ? Colors.yellow[200]!
+                              : Colors.orange[200]!,
                         ),
                         borderRadius: BorderRadius.circular(30),
                         color: (isThisCurrentUser)
@@ -297,15 +314,19 @@ class _MessagesScreenState extends State<MessagesScreen> {
                               attachmentType: attachmentType,
                             ),
                           // Message Text
-                          Text(
-                            (messageData.type == "deleted")
-                                ? ("This message was deleted")
-                                : (messageData.text ?? ""),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                          if (Helpers.isStringValid(text: messageData.text))
+                            Linkify(
+                              onOpen: (link) async {
+                                _launch(Uri.parse(link.url));
+                              },
+                              text: (messageData.type == "deleted")
+                                  ? ("This message was deleted")
+                                  : (messageData.text ?? ""),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -482,8 +503,10 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
           return Text(
             (isOnline) ? 'online' : 'offline',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: (isOnline)
+                  ? const Color.fromARGB(255, 124, 234, 130)
+                  : Colors.white,
               fontWeight: FontWeight.w500,
               fontSize: 16,
             ),
@@ -692,5 +715,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   void _cancelUnreadCountStream() {
     BlocProvider.of<MessagesBloc>(context).cancelUnreadCountStream();
+  }
+
+  Future<void> _launch(Uri url) async {
+    await canLaunchUrl(url)
+        ? await launchUrl(url)
+        : CustomFlutterToast.error(
+            message: 'could_not_launch_this_app',
+          );
   }
 }
