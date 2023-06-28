@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -25,15 +24,28 @@ class MessagesScreen extends StatefulWidget {
 
 class _MessagesScreenState extends State<MessagesScreen> {
   final _messageInputController = StreamMessageInputController();
+  final _scrollController = ScrollController();
+  final GlobalKey messagesListGlobalKey = GlobalKey();
   late Channel channel;
   Member? otherUser;
   User? otherUserDetails;
   bool isDataInitilised = false;
   List<Message> selectedMessages = [];
+  List<GlobalKey> messagesGlobalKeys = [];
+  double emojIconsWidgetMargin = 0.0;
+  double messageListYcoordinate = 0.0;
+  bool showAddReactionWidget = false;
 
   @override
   void didChangeDependencies() {
     _initiliseData();
+    _scrollController.addListener(() {
+      if (showAddReactionWidget) {
+        showAddReactionWidget = false;
+        // add in the bloc
+        setState(() {});
+      }
+    });
     super.didChangeDependencies();
   }
 
@@ -59,148 +71,182 @@ class _MessagesScreenState extends State<MessagesScreen> {
             backgroundColor: ColorConstants.black,
             body: SafeArea(
               bottom: false,
-              child: Column(
-                children: <Widget>[
-                  // User Details
-                  Container(
-                    padding: const EdgeInsets.only(
-                      left: 15,
-                      top: 15,
-                      right: 20,
-                      bottom: 25,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            if (selectedMessages.isNotEmpty) {
-                              BlocProvider.of<MessagesBloc>(context).add(
-                                SelectOrUnselectMessageEvent(
-                                  context: context,
-                                  isSelect: true,
-                                  message: Message(),
-                                  isClear: true,
+              child: Stack(
+                children: [
+                  Column(
+                    children: <Widget>[
+                      // User Details
+                      Container(
+                        padding: const EdgeInsets.only(
+                          left: 15,
+                          top: 15,
+                          right: 20,
+                          bottom: 25,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                if (selectedMessages.isNotEmpty) {
+                                  BlocProvider.of<MessagesBloc>(context).add(
+                                    SelectOrUnselectMessageEvent(
+                                      context: context,
+                                      isSelect: true,
+                                      message: Message(),
+                                      isClear: true,
+                                    ),
+                                  );
+                                } else {
+                                  _cancelUnreadCountStream();
+                                  Navigator.of(context).maybePop();
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 0,
+                                  right: 15,
                                 ),
-                              );
-                            } else {
-                              _cancelUnreadCountStream();
-                              Navigator.of(context).maybePop();
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 0,
-                              right: 15,
-                            ),
-                            child: Icon(
-                              (selectedMessages.isNotEmpty)
-                                  ? Icons.close
-                                  : Platform.isIOS
-                                      ? Icons.arrow_back_ios
-                                      : Icons.arrow_back,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        // User Image
-                        AvatarImageWidget(userDetails: otherUserDetails),
-                        const SizedBox(
-                          width: 15,
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // User Name
-                              Text(
-                                (otherUserDetails != null)
-                                    ? otherUserDetails!.name
-                                    : "",
-                                style: const TextStyle(
+                                child: Icon(
+                                  (selectedMessages.isNotEmpty)
+                                      ? Icons.close
+                                      : Platform.isIOS
+                                          ? Icons.arrow_back_ios
+                                          : Icons.arrow_back,
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 18,
                                 ),
                               ),
-                              const SizedBox(
-                                height: 5,
+                            ),
+                            // User Image
+                            AvatarImageWidget(userDetails: otherUserDetails),
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // User Name
+                                  Text(
+                                    (otherUserDetails != null)
+                                        ? otherUserDetails!.name
+                                        : "",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  // User Status
+                                  if (channel.state != null)
+                                    _buildMemberStatus(
+                                      channelState: channel.state!,
+                                    ),
+                                ],
                               ),
-                              // User Status
-                              if (channel.state != null)
-                                _buildMemberStatus(
-                                  channelState: channel.state!,
+                            ),
+                            if (selectedMessages.isNotEmpty)
+                              IconButton(
+                                onPressed: () {
+                                  showAddReactionWidget = false;
+                                  BlocProvider.of<MessagesBloc>(context).add(
+                                      DeleteMessageEvent(context: context));
+                                },
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.red,
+                                  size: 28,
                                 ),
-                            ],
+                              )
+                          ],
+                        ),
+                      ),
+                      // Messages List
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(30.0),
+                            topRight: Radius.circular(30.0),
+                          ),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30),
+                              ),
+                            ),
+                            child: StreamChannel(
+                              channel: channel,
+                              showLoading: true,
+                              child: MessageListCore(
+                                emptyBuilder: (context) {
+                                  return const Center(
+                                    child: Text(
+                                      ('No Messages here...'),
+                                      style: TextStyle(
+                                        color: ColorConstants.grey,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                loadingBuilder: (context) {
+                                  return const Center(
+                                    child: CircularProgressIndicator.adaptive(
+                                      strokeWidth: 2.5,
+                                    ),
+                                  );
+                                },
+                                messageListBuilder: (context, messagesList) {
+                                  return _buildMessageList(
+                                    messagesList: messagesList,
+                                    otherUser: otherUserDetails,
+                                  );
+                                },
+                                errorBuilder: (context, err) {
+                                  return const Center(
+                                    child: Text(
+                                      ('Oh no, something went wrong.'),
+                                      style: TextStyle(
+                                        color: ColorConstants.grey,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
-                        if (selectedMessages.isNotEmpty)
-                          IconButton(
-                            onPressed: () {
-                              BlocProvider.of<MessagesBloc>(context)
-                                  .add(DeleteMessageEvent(context: context));
-                            },
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.red,
-                              size: 28,
-                            ),
-                          )
-                      ],
-                    ),
-                  ),
-                  // Messages List
-                  Expanded(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
-                        ),
                       ),
-                      child: StreamChannel(
-                        channel: channel,
-                        showLoading: true,
-                        child: MessageListCore(
-                          emptyBuilder: (context) {
-                            return const Center(
-                              child: Text(
-                                ('No Messages here...'),
-                                style: TextStyle(
-                                  color: ColorConstants.grey,
-                                ),
-                              ),
-                            );
-                          },
-                          loadingBuilder: (context) {
-                            return const Center(
-                              child: CircularProgressIndicator.adaptive(
-                                strokeWidth: 2.5,
-                              ),
-                            );
-                          },
-                          messageListBuilder: (context, messagesList) {
-                            return _buildMessageList(
-                              messagesList: messagesList,
-                              otherUser: otherUserDetails,
-                            );
-                          },
-                          errorBuilder: (context, err) {
-                            return const Center(
-                              child: Text(
-                                ('Oh no, something went wrong.'),
-                                style: TextStyle(
-                                  color: ColorConstants.grey,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
+
+                      _buildInputMessageWidget(),
+                    ],
                   ),
-                  _buildInputMessageWidget(),
+                  if (showAddReactionWidget)
+                    Container(
+                      height: 50,
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.only(
+                          top: emojIconsWidgetMargin == 0.0
+                              ? 0.0
+                              : emojIconsWidgetMargin < 0
+                                  ? messageListYcoordinate - 100
+                                  : (emojIconsWidgetMargin -
+                                              messageListYcoordinate) <
+                                          80
+                                      ? messageListYcoordinate + 30
+                                      : emojIconsWidgetMargin - 45,
+                          left: MediaQuery.of(context).size.width * 0.55),
+                      color: Colors.amber,
+                      child: Text(
+                          (emojIconsWidgetMargin - messageListYcoordinate) < 80
+                              ? "less"
+                              : 'normal'),
+                    ),
                 ],
               ),
             ),
@@ -214,8 +260,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
     required List<Message> messagesList,
     required User? otherUser,
   }) {
+    getGlobalKeys(messageCount: messagesList.length);
+
     return ListView.builder(
+      key: messagesListGlobalKey,
       reverse: true,
+      controller: _scrollController,
       itemCount: messagesList.length,
       itemBuilder: (context, index) {
         var messageData = messagesList[index];
@@ -230,23 +280,36 @@ class _MessagesScreenState extends State<MessagesScreen> {
             ? (messageData.attachments.first.type ?? "")
             : "";
 
-        return InkWell(
-          onTapDown: (_) {
-            print('on tap down');
-          },
-          onTapUp: (_) {
-            print('on tap up');
-          },
+        return GestureDetector(
+          key: messagesGlobalKeys[index],
+          onTapDown: (_) {},
+          onTapUp: (_) {},
           onLongPress: () {
-            BlocProvider.of<MessagesBloc>(context).add(
-              SelectOrUnselectMessageEvent(
-                context: context,
-                isSelect: true,
-                message: messageData,
-              ),
-            );
+            if (!selectedMessages.any(
+                    (messageDetails) => messageDetails.id == messageData.id) &&
+                messageData.type != 'deleted') {
+              showAddReactionWidget = false;
+
+              if (selectedMessages.isEmpty) {
+                emojIconsWidgetMargin = getWidgetGlobalYCoordinate(
+                    globalKey: messagesGlobalKeys[index]);
+                messageListYcoordinate = getWidgetGlobalYCoordinate(
+                    globalKey: messagesListGlobalKey);
+                showAddReactionWidget = true;
+              }
+
+              BlocProvider.of<MessagesBloc>(context).add(
+                SelectOrUnselectMessageEvent(
+                  context: context,
+                  isSelect: true,
+                  message: messageData,
+                ),
+              );
+            }
           },
           onTap: () {
+            showAddReactionWidget = false;
+
             BlocProvider.of<MessagesBloc>(context).add(
               SelectOrUnselectMessageEvent(
                 context: context,
@@ -270,7 +333,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
               color: (selectedMessages.any(
                 (message) => message.id == messageData.id,
               ))
-                  ? Colors.yellow[50]
+                  ? Colors.yellow.withOpacity(0.1)
                   : null,
             ),
             child: Column(
@@ -317,7 +380,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
                           if (Helpers.isStringValid(text: messageData.text))
                             Linkify(
                               onOpen: (link) async {
-                                _launch(Uri.parse(link.url));
+                                BlocProvider.of<MessagesBloc>(context).add(
+                                  LaunchMessagelinkEvent(
+                                    context: context,
+                                    link: link.url,
+                                  ),
+                                );
                               },
                               text: (messageData.type == "deleted")
                                   ? ("This message was deleted")
@@ -717,11 +785,22 @@ class _MessagesScreenState extends State<MessagesScreen> {
     BlocProvider.of<MessagesBloc>(context).cancelUnreadCountStream();
   }
 
-  Future<void> _launch(Uri url) async {
-    await canLaunchUrl(url)
-        ? await launchUrl(url)
-        : CustomFlutterToast.error(
-            message: 'could_not_launch_this_app',
-          );
+  void getGlobalKeys({required int messageCount}) {
+    messagesGlobalKeys.clear();
+
+    for (int i = 0; i < messageCount; i++) {
+      messagesGlobalKeys.add(GlobalKey());
+    }
+  }
+
+  double getWidgetGlobalYCoordinate({required GlobalKey globalKey}) {
+    RenderBox renderBox =
+        globalKey.currentContext!.findRenderObject() as RenderBox;
+
+    final double widgetGlobalYCoordinate =
+        (renderBox.localToGlobal(Offset.zero).dy -
+            MediaQuery.of(context).viewPadding.top);
+
+    return widgetGlobalYCoordinate;
   }
 }

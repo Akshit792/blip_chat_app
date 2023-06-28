@@ -54,3 +54,13 @@ class SelectOrUnselectMessageEvent extends MessagesEvent {
     this.isClear,
   });
 }
+
+class LaunchMessagelinkEvent extends MessagesEvent {
+  final BuildContext context;
+  final String link;
+
+  LaunchMessagelinkEvent({
+    required this.context,
+    required this.link,
+  });
+}

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
   StreamSubscription<int>? unreadCountSubscription;
@@ -156,6 +157,26 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
           LogPrint.error(
             error: e,
             errorMsg: 'Select Unselect Message Event',
+            stackTrace: s,
+          );
+        }
+      },
+    );
+    on<LaunchMessagelinkEvent>(
+      (event, emit) async {
+        try {
+          Uri linkUrl = Uri.parse(event.link);
+
+          await canLaunchUrl(linkUrl)
+              ? await launchUrl(linkUrl)
+              : CustomFlutterToast.error(
+                  message: 'could_not_launch_this_app',
+                );
+        } catch (e, s) {
+          CustomFlutterToast.error(message: 'Unable to open link');
+          LogPrint.error(
+            error: e,
+            errorMsg: 'Launch Message Link Event',
             stackTrace: s,
           );
         }
