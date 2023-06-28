@@ -39,13 +39,16 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   void didChangeDependencies() {
     _initiliseData();
-    _scrollController.addListener(() {
-      if (showAddReactionWidget) {
-        showAddReactionWidget = false;
-        // add in the bloc
-        setState(() {});
-      }
-    });
+    _scrollController.addListener(
+      () {
+        if (showAddReactionWidget) {
+          showAddReactionWidget = false;
+          BlocProvider.of<MessagesBloc>(context).add(
+            OnMessageListScroll(),
+          );
+        }
+      },
+    );
     super.didChangeDependencies();
   }
 
@@ -231,21 +234,21 @@ class _MessagesScreenState extends State<MessagesScreen> {
                       width: MediaQuery.of(context).size.width * 0.4,
                       alignment: Alignment.center,
                       margin: EdgeInsets.only(
-                          top: emojIconsWidgetMargin == 0.0
-                              ? 0.0
-                              : emojIconsWidgetMargin < 0
-                                  ? messageListYcoordinate - 100
-                                  : (emojIconsWidgetMargin -
-                                              messageListYcoordinate) <
-                                          80
-                                      ? messageListYcoordinate + 30
-                                      : emojIconsWidgetMargin - 45,
-                          left: MediaQuery.of(context).size.width * 0.55),
-                      color: Colors.amber,
-                      child: Text(
-                          (emojIconsWidgetMargin - messageListYcoordinate) < 80
-                              ? "less"
-                              : 'normal'),
+                        top: (emojIconsWidgetMargin == 0.0)
+                            ? 0.0
+                            : (emojIconsWidgetMargin < 0)
+                                ? messageListYcoordinate + 10
+                                : (emojIconsWidgetMargin -
+                                            messageListYcoordinate) <
+                                        80
+                                    ? (messageListYcoordinate + 10)
+                                    : (emojIconsWidgetMargin),
+                        left: MediaQuery.of(context).size.width * 0.5,
+                      ),
+                      child: Card(
+                        child: Text(
+                            '$emojIconsWidgetMargin $messageListYcoordinate'),
+                      ),
                     ),
                 ],
               ),
@@ -285,9 +288,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
           onTapDown: (_) {},
           onTapUp: (_) {},
           onLongPress: () {
-            if (!selectedMessages.any(
+            bool canUserSelectMessage = (!selectedMessages.any(
                     (messageDetails) => messageDetails.id == messageData.id) &&
-                messageData.type != 'deleted') {
+                messageData.type != 'deleted');
+
+            if (canUserSelectMessage) {
               showAddReactionWidget = false;
 
               if (selectedMessages.isEmpty) {

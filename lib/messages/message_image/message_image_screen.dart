@@ -104,38 +104,39 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                               horizontal: 20,
                             ),
                             child: ListView.builder(
-                                itemCount: imagesList.length,
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (context, index) {
-                                  return InkWell(
-                                    onTap: () {
-                                      messageImageBloc.add(
-                                        ChangeSelectedImageEvent(
-                                          context: context,
-                                          currentIndex: index,
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      height: 40,
-                                      width: 40,
-                                      margin: const EdgeInsets.only(right: 5),
-                                      decoration: BoxDecoration(
-                                        border: (selectedImageIndex == index)
-                                            ? Border.all(
-                                                color: ColorConstants.yellow,
-                                              )
-                                            : null,
+                              itemCount: imagesList.length,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                return InkWell(
+                                  onTap: () {
+                                    messageImageBloc.add(
+                                      ChangeSelectedImageEvent(
+                                        context: context,
+                                        currentIndex: index,
                                       ),
-                                      child: Image(
-                                        image: FileImage(
-                                          imagesList[index],
-                                        ),
-                                        fit: BoxFit.cover,
-                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    height: 40,
+                                    width: 40,
+                                    margin: const EdgeInsets.only(right: 5),
+                                    decoration: BoxDecoration(
+                                      border: (selectedImageIndex == index)
+                                          ? Border.all(
+                                              color: ColorConstants.yellow,
+                                            )
+                                          : null,
                                     ),
-                                  );
-                                }),
+                                    child: Image(
+                                      image: FileImage(
+                                        imagesList[index],
+                                      ),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(
@@ -147,46 +148,49 @@ class _MessageImageScreenState extends State<MessageImageScreen> {
                                   width: 10,
                                 ),
                                 Flexible(
-                                    child: TextFormField(
-                                  keyboardType: TextInputType.multiline,
-                                  controller: TextEditingController.fromValue(
-                                    TextEditingValue(
-                                      text: captionText,
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.multiline,
+                                    controller: TextEditingController.fromValue(
+                                      TextEditingValue(
+                                        text: captionText,
+                                      ),
                                     ),
-                                  ),
-                                  maxLines: null,
-                                  onChanged: (val) {
-                                    captionText = val;
-                                  },
-                                  decoration: InputDecoration(
-                                    hintText: ('Add a caption...'),
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    hintStyle: const TextStyle(
-                                      color: ColorConstants.black,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 18,
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 25,
-                                      vertical: 20,
-                                    ),
-                                    border: InputBorder.none,
-                                    focusedBorder: OutlineInputBorder(
+                                    maxLines: null,
+                                    onChanged: (val) {
+                                      captionText = val;
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: ('Add a caption...'),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      hintStyle: const TextStyle(
+                                        color: ColorConstants.black,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 18,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        horizontal: 25,
+                                        vertical: 20,
+                                      ),
+                                      border: InputBorder.none,
+                                      focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                          borderSide: const BorderSide(
+                                            color: ColorConstants.grey,
+                                            width: 1.4,
+                                          )),
+                                      enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(30),
                                         borderSide: const BorderSide(
                                           color: ColorConstants.grey,
                                           width: 1.4,
-                                        )),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(30),
-                                      borderSide: const BorderSide(
-                                        color: ColorConstants.grey,
-                                        width: 1.4,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                )),
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.only(
                                     left: 20,

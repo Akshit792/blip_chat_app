@@ -64,3 +64,7 @@ class LaunchMessagelinkEvent extends MessagesEvent {
     required this.link,
   });
 }
+
+class OnMessageListScroll extends MessagesEvent {
+  OnMessageListScroll();
+}

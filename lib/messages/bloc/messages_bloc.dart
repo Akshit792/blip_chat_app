@@ -182,6 +182,9 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
         }
       },
     );
+    on<OnMessageListScroll>((event, emit) {
+      emit(LoadedMessagesState());
+    });
   }
 
   Future<void> _unreadCountHandler(int count) async {
