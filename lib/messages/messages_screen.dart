@@ -22,19 +22,51 @@ class MessagesScreen extends StatefulWidget {
   State<MessagesScreen> createState() => _MessagesScreenState();
 }
 
-class _MessagesScreenState extends State<MessagesScreen> {
+class _MessagesScreenState extends State<MessagesScreen>
+    with TickerProviderStateMixin {
   final _messageInputController = StreamMessageInputController();
-  final _scrollController = ScrollController();
   final GlobalKey messagesListGlobalKey = GlobalKey();
+  final _scrollController = ScrollController();
   late Channel channel;
   Member? otherUser;
   User? otherUserDetails;
-  bool isDataInitilised = false;
+  bool isDataInitilised = false, showAddReactionWidget = false;
   List<Message> selectedMessages = [];
   List<GlobalKey> messagesGlobalKeys = [];
   double emojIconsWidgetMargin = 0.0;
   double messageListYcoordinate = 0.0;
-  bool showAddReactionWidget = false;
+
+  // show box animation
+  late AnimationController _reactionWidgetAnimationControler;
+  late Tween _reactionWidgetTween;
+  late Animation _reactionWidgetAnimation;
+
+  @override
+  void initState() {
+    _reactionWidgetAnimationControler = AnimationController(
+      vsync: this,
+      duration: const Duration(microseconds: 100),
+    );
+
+    _reactionWidgetTween = Tween(begin: 0.0, end: 1.0);
+
+    _reactionWidgetAnimation = _reactionWidgetTween.animate(
+      CurvedAnimation(
+        parent: _reactionWidgetAnimationControler,
+        curve: Curves.bounceIn,
+      ),
+    );
+
+    _reactionWidgetAnimation.addListener(
+      () {
+        BlocProvider.of<MessagesBloc>(context).add(
+          OnMessageListScroll(),
+        );
+      },
+    );
+
+    super.initState();
+  }
 
   @override
   void didChangeDependencies() {
@@ -229,25 +261,35 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     ],
                   ),
                   if (showAddReactionWidget)
-                    Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.only(
-                        top: (emojIconsWidgetMargin == 0.0)
-                            ? 0.0
-                            : (emojIconsWidgetMargin < 0)
-                                ? messageListYcoordinate + 10
-                                : (emojIconsWidgetMargin -
-                                            messageListYcoordinate) <
-                                        80
-                                    ? (messageListYcoordinate + 10)
-                                    : (emojIconsWidgetMargin),
-                        left: MediaQuery.of(context).size.width * 0.5,
-                      ),
-                      child: Card(
-                        child: Text(
-                            '$emojIconsWidgetMargin $messageListYcoordinate'),
+                    Opacity(
+                      opacity: _reactionWidgetAnimation.value,
+                      child: Container(
+                        height: 50,
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.only(
+                          top: (emojIconsWidgetMargin == 0.0)
+                              ? 0.0
+                              : (emojIconsWidgetMargin < 0)
+                                  ? messageListYcoordinate + 10
+                                  : (emojIconsWidgetMargin -
+                                              messageListYcoordinate) <
+                                          80
+                                      ? (messageListYcoordinate + 10)
+                                      : (emojIconsWidgetMargin),
+                          left: MediaQuery.of(context).size.width * 0.5,
+                        ),
+                        child: Card(
+                          elevation: 10,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                                '$emojIconsWidgetMargin $messageListYcoordinate'),
+                          ),
+                        ),
                       ),
                     ),
                 ],
@@ -297,9 +339,17 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
               if (selectedMessages.isEmpty) {
                 emojIconsWidgetMargin = getWidgetGlobalYCoordinate(
-                    globalKey: messagesGlobalKeys[index]);
+                  globalKey: messagesGlobalKeys[index],
+                );
+
                 messageListYcoordinate = getWidgetGlobalYCoordinate(
-                    globalKey: messagesListGlobalKey);
+                  globalKey: messagesListGlobalKey,
+                );
+
+                _reactionWidgetAnimationControler.reset();
+
+                _reactionWidgetAnimationControler.forward();
+
                 showAddReactionWidget = true;
               }
 

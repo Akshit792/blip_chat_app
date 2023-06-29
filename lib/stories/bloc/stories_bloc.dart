@@ -144,7 +144,6 @@ class StoriesBloc extends Bloc<StoriesEvent, StoriesState> {
                 ),
               );
             } catch (e, s) {
-              print('camera: error error $e');
               LogPrint.error(
                   error: e, errorMsg: 'Take Pictire Events', stackTrace: s);
             }

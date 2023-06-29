@@ -96,6 +96,19 @@ flutter:
     - assets/images/search_icon.png
     - assets/images/rock_emoji_icon.png
     - assets/images/mic_icon.png
+    - assets/images/angry.gif
+    - assets/images/angry2.png
+    - assets/images/haha.gif
+    - assets/images/haha2.png
+    - assets/images/ic_like_fill.png
+    - assets/images/ic_like.png
+    - assets/images/like.gif
+    - assets/images/love.gif
+    - assets/images/love2.png
+    - assets/images/sad.gif
+    - assets/images/sad2.png
+    - assets/images/wow.gif
+    - assets/images/wow2.png
    
 
   # An image asset can refer to one or more resolution-specific "variants", see

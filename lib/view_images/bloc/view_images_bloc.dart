@@ -3,7 +3,6 @@ import 'package:blip_chat_app/common/models/logger.dart';
 import 'package:blip_chat_app/view_images/bloc/view_images_event.dart';
 import 'package:blip_chat_app/view_images/bloc/view_images_state.dart';
 import 'package:bloc/bloc.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 
 class ViewImageBloc extends Bloc<ViewImageEvent, ViewImageState> {
   final List<String> imagesUrl;
