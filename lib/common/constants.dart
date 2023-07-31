@@ -3,6 +3,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
+enum EmojiType { like, love, haha, wow, sad, angry }
+
 List<CameraDescription> cameras = [];
 
 enum AuthResultType { success, error }
@@ -17,6 +19,20 @@ class Constants {
   static const searchIconPlaceholder = "assets/images/search_icon.png";
   static const rockEmojiIconPlaceHolder = "assets/images/rock_emoji_icon.png";
   static const micIconPlaceholder = "assets/images/mic_icon.png";
+  static const angryEmojiPlaceholder = "assets/images/angry2.png";
+  static const hahaEmojiPlaceholder = "assets/images/haha2.png";
+  static const icLikeFillPlaceholder = "assets/images/ic_like_fill.png";
+  static const icLikePlaceholder = "assets/images/ic_like.png";
+  static const loveEmojiPlaceholder = "assets/images/love2.png";
+  static const sadEmojiPlaceholder = "assets/images/sad2.png";
+  static const wowEmojiPlaceholder = "assets/images/wow2.png";
+
+  static const angryEmojiGif = "assets/images/angry.gif";
+  static const hahaEmojiGif = "assets/images/haha.gif";
+  static const likeIconGif = "assets/images/like.gif";
+  static const loveEmojiGif = "assets/images/love.gif";
+  static const sadEmojiGif = "assets/images/sad.gif";
+  static const wowEmojiGif = "assets/images/wow.gif";
 
   static const STREAM_API_KEY = "gvhj7kveuees";
   static const AUTH0_DOMAIN = "hasknosiit.us.auth0.com";
@@ -45,6 +61,15 @@ class Constants {
       'icon': Icons.flash_auto,
       'mode': 'flash_auto',
     }
+  ];
+
+  static const List<EmojiType> reactionEmojiTypes = [
+    EmojiType.like,
+    EmojiType.love,
+    EmojiType.haha,
+    EmojiType.wow,
+    EmojiType.sad,
+    EmojiType.angry,
   ];
 }
 

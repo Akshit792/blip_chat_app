@@ -15,6 +15,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
+enum EmojiAnimationStatus { done, notStarted, isAnimating }
+
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
 
@@ -28,6 +30,7 @@ class _MessagesScreenState extends State<MessagesScreen>
   final GlobalKey messagesListGlobalKey = GlobalKey();
   final _scrollController = ScrollController();
   late Channel channel;
+  List<Map<String, dynamic>> emojiIconsAnimtionData = [];
   Member? otherUser;
   User? otherUserDetails;
   bool isDataInitilised = false, showAddReactionWidget = false;
@@ -36,16 +39,32 @@ class _MessagesScreenState extends State<MessagesScreen>
   double emojIconsWidgetMargin = 0.0;
   double messageListYcoordinate = 0.0;
 
-  // show box animation
   late AnimationController _reactionWidgetAnimationControler;
   late Tween _reactionWidgetTween;
   late Animation _reactionWidgetAnimation;
+  final Duration _reactionWidgetDuration = const Duration(milliseconds: 100);
+
+  late AnimationController _emojiIconsAnimationController;
+  late Tween _emojiIconsTween;
+  late Animation _emojiIconsAnimation;
+  final Duration _emojiIconAnimationDuration =
+      const Duration(milliseconds: 500);
 
   @override
   void initState() {
+    for (var emojiType in Constants.reactionEmojiTypes) {
+      emojiIconsAnimtionData.add(
+        {
+          'type': emojiType,
+          'animation_status': EmojiAnimationStatus.notStarted,
+        },
+      );
+    }
+
+    // reaction widget animation
     _reactionWidgetAnimationControler = AnimationController(
       vsync: this,
-      duration: const Duration(microseconds: 100),
+      duration: _reactionWidgetDuration,
     );
 
     _reactionWidgetTween = Tween(begin: 0.0, end: 1.0);
@@ -53,12 +72,81 @@ class _MessagesScreenState extends State<MessagesScreen>
     _reactionWidgetAnimation = _reactionWidgetTween.animate(
       CurvedAnimation(
         parent: _reactionWidgetAnimationControler,
-        curve: Curves.bounceIn,
+        curve: Curves.easeIn,
       ),
     );
 
     _reactionWidgetAnimation.addListener(
       () {
+        BlocProvider.of<MessagesBloc>(context).add(
+          OnMessageListScroll(),
+        );
+      },
+    );
+
+    // emoji Icons animation
+    _emojiIconsAnimationController = AnimationController(
+      vsync: this,
+      duration: _emojiIconAnimationDuration,
+    );
+
+    _emojiIconsTween = Tween(begin: 0.0, end: 1.0);
+
+    _emojiIconsAnimation = _emojiIconsTween.animate(
+      CurvedAnimation(
+        parent: _emojiIconsAnimationController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    _emojiIconsAnimation.addListener(
+      () {
+        if (_emojiIconsAnimation.value == 0) {
+          if (emojiIconsAnimtionData.any((element) =>
+              element['animation_status'] == EmojiAnimationStatus.done)) {
+            var index = 0;
+
+            emojiIconsAnimtionData.forEach((element) {
+              if (element['animation_status'] == EmojiAnimationStatus.done) {
+                index = index + 1;
+              }
+            });
+
+            if (index != emojiIconsAnimtionData.length) {
+              emojiIconsAnimtionData[index]['animation_status'] =
+                  EmojiAnimationStatus.isAnimating;
+            }
+          } else {
+            emojiIconsAnimtionData[0]['animation_status'] =
+                EmojiAnimationStatus.isAnimating;
+          }
+        }
+
+        if (_emojiIconsAnimation.value == 1) {
+          if (emojiIconsAnimtionData.any((element) =>
+              element['animation_status'] == EmojiAnimationStatus.done)) {
+            var index = 0;
+
+            emojiIconsAnimtionData.forEach((element) {
+              if (element['animation_status'] == EmojiAnimationStatus.done) {
+                index = index + 1;
+              }
+            });
+
+            if (index != emojiIconsAnimtionData.length) {
+              emojiIconsAnimtionData[index]['animation_status'] =
+                  EmojiAnimationStatus.done;
+              _emojiIconsAnimationController.reset();
+              _emojiIconsAnimationController.forward();
+            }
+          } else {
+            emojiIconsAnimtionData[0]['animation_status'] =
+                EmojiAnimationStatus.done;
+            _emojiIconsAnimationController.reset();
+            _emojiIconsAnimationController.forward();
+          }
+        }
+
         BlocProvider.of<MessagesBloc>(context).add(
           OnMessageListScroll(),
         );
@@ -87,6 +175,9 @@ class _MessagesScreenState extends State<MessagesScreen>
   @override
   void dispose() {
     _messageInputController.dispose();
+    _scrollController.dispose();
+    _reactionWidgetAnimationControler.dispose();
+    _emojiIconsAnimationController.dispose();
     super.dispose();
   }
 
@@ -256,42 +347,10 @@ class _MessagesScreenState extends State<MessagesScreen>
                           ),
                         ),
                       ),
-
                       _buildInputMessageWidget(),
                     ],
                   ),
-                  if (showAddReactionWidget)
-                    Opacity(
-                      opacity: _reactionWidgetAnimation.value,
-                      child: Container(
-                        height: 50,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        alignment: Alignment.center,
-                        margin: EdgeInsets.only(
-                          top: (emojIconsWidgetMargin == 0.0)
-                              ? 0.0
-                              : (emojIconsWidgetMargin < 0)
-                                  ? messageListYcoordinate + 10
-                                  : (emojIconsWidgetMargin -
-                                              messageListYcoordinate) <
-                                          80
-                                      ? (messageListYcoordinate + 10)
-                                      : (emojIconsWidgetMargin),
-                          left: MediaQuery.of(context).size.width * 0.5,
-                        ),
-                        child: Card(
-                          elevation: 10,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Text(
-                                '$emojIconsWidgetMargin $messageListYcoordinate'),
-                          ),
-                        ),
-                      ),
-                    ),
+                  _buildMessageReactionWidget(),
                 ],
               ),
             ),
@@ -299,6 +358,212 @@ class _MessagesScreenState extends State<MessagesScreen>
         },
       ),
     );
+  }
+
+  Widget _buildMessageReactionWidget() {
+    EdgeInsetsGeometry? margin;
+
+    if (showAddReactionWidget) {
+      margin = EdgeInsets.only(
+        top: (emojIconsWidgetMargin == 0.0)
+            ? 0.0
+            : (emojIconsWidgetMargin < 0)
+                ? messageListYcoordinate + 10
+                : (emojIconsWidgetMargin - messageListYcoordinate) < 80
+                    ? (messageListYcoordinate + 10)
+                    : (emojIconsWidgetMargin),
+        left: (selectedMessages.first.user?.id == otherUser?.userId)
+            ? 0.0
+            : MediaQuery.of(context).size.width * 0.1,
+        right:
+            (selectedMessages.first.user?.id == otherUser?.userId) ? 0.0 : 0.0,
+      );
+    }
+
+    return (showAddReactionWidget)
+        ? Stack(
+            children: [
+              Opacity(
+                opacity: _reactionWidgetAnimation.value,
+                child: Container(
+                  height: 65,
+                  width: MediaQuery.of(context).size.width * 0.78,
+                  margin: margin,
+                  child: Card(
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 30,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                height: 65,
+                width: MediaQuery.of(context).size.width * 0.78,
+                margin: margin,
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Visibility(
+                      visible: (emojiIconsAnimtionData
+                                  .where((element) =>
+                                      element['type'] == EmojiType.like)
+                                  .first['animation_status'] ==
+                              EmojiAnimationStatus.isAnimating ||
+                          emojiIconsAnimtionData
+                                  .where((element) =>
+                                      element['type'] == EmojiType.like)
+                                  .first['animation_status'] ==
+                              EmojiAnimationStatus.done),
+                      child: SizedBox(
+                        height: emojiIconsAnimtionData
+                                    .where((element) =>
+                                        element['type'] == EmojiType.like)
+                                    .first['animation_status'] ==
+                                EmojiAnimationStatus.done
+                            ? 35
+                            : _emojiIconsAnimationController.value * 35,
+                        width: emojiIconsAnimtionData
+                                    .where((element) =>
+                                        element['type'] == EmojiType.like)
+                                    .first['animation_status'] ==
+                                EmojiAnimationStatus.done
+                            ? 35
+                            : _emojiIconsAnimationController.value * 35,
+                        child: Image.asset(
+                          Constants.likeIconGif,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+
+                    Visibility(
+                      visible: (emojiIconsAnimtionData
+                                  .where((element) =>
+                                      element['type'] == EmojiType.love)
+                                  .first['animation_status'] ==
+                              EmojiAnimationStatus.isAnimating ||
+                          emojiIconsAnimtionData
+                                  .where((element) =>
+                                      element['type'] == EmojiType.love)
+                                  .first['animation_status'] ==
+                              EmojiAnimationStatus.done),
+                      child: SizedBox(
+                        height: emojiIconsAnimtionData
+                                    .where((element) =>
+                                        element['type'] == EmojiType.love)
+                                    .first['animation_status'] ==
+                                EmojiAnimationStatus.done
+                            ? 35
+                            : _emojiIconsAnimationController.value * 35,
+                        width: emojiIconsAnimtionData
+                                    .where((element) =>
+                                        element['type'] == EmojiType.love)
+                                    .first['animation_status'] ==
+                                EmojiAnimationStatus.done
+                            ? 35
+                            : _emojiIconsAnimationController.value * 35,
+                        child: Image.asset(
+                          Constants.loveEmojiGif,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+
+                    Visibility(
+                      visible: (emojiIconsAnimtionData
+                                  .where((element) =>
+                                      element['type'] == EmojiType.haha)
+                                  .first['animation_status'] ==
+                              EmojiAnimationStatus.isAnimating ||
+                          emojiIconsAnimtionData
+                                  .where((element) =>
+                                      element['type'] == EmojiType.haha)
+                                  .first['animation_status'] ==
+                              EmojiAnimationStatus.done),
+                      child: SizedBox(
+                        height: emojiIconsAnimtionData
+                                    .where((element) =>
+                                        element['type'] == EmojiType.haha)
+                                    .first['animation_status'] ==
+                                EmojiAnimationStatus.done
+                            ? 35
+                            : _emojiIconsAnimationController.value * 35,
+                        width: emojiIconsAnimtionData
+                                    .where((element) =>
+                                        element['type'] == EmojiType.haha)
+                                    .first['animation_status'] ==
+                                EmojiAnimationStatus.done
+                            ? 35
+                            : _emojiIconsAnimationController.value * 35,
+                        child: Image.asset(
+                          Constants.hahaEmojiGif,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+
+                    Visibility(
+                      visible: (emojiIconsAnimtionData
+                                  .where((element) =>
+                                      element['type'] == EmojiType.wow)
+                                  .first['animation_status'] ==
+                              EmojiAnimationStatus.isAnimating ||
+                          emojiIconsAnimtionData
+                                  .where((element) =>
+                                      element['type'] == EmojiType.wow)
+                                  .first['animation_status'] ==
+                              EmojiAnimationStatus.done),
+                      child: SizedBox(
+                        height: emojiIconsAnimtionData
+                                    .where((element) =>
+                                        element['type'] == EmojiType.wow)
+                                    .first['animation_status'] ==
+                                EmojiAnimationStatus.done
+                            ? 35
+                            : _emojiIconsAnimationController.value * 35,
+                        width: emojiIconsAnimtionData
+                                    .where((element) =>
+                                        element['type'] == EmojiType.wow)
+                                    .first['animation_status'] ==
+                                EmojiAnimationStatus.done
+                            ? 35
+                            : _emojiIconsAnimationController.value * 35,
+                        child: Image.asset(
+                          Constants.wowEmojiGif,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    // SizedBox(
+                    //   height: _emojiIconsAnimationController.value * 35,
+                    //   width: _emojiIconsAnimationController.value * 35,
+                    //   child: Image.asset(
+                    //     Constants.sadEmojiGif,
+                    //     fit: BoxFit.cover,
+                    //   ),
+                    // ),
+                    // SizedBox(
+                    //   height: _emojiIconsAnimationController.value * 35,
+                    //   width: _emojiIconsAnimationController.value * 35,
+                    //   child: Image.asset(
+                    //     Constants.angryEmojiGif,
+                    //     fit: BoxFit.cover,
+                    //   ),
+                    // ),
+                  ],
+                ),
+              )
+            ],
+          )
+        : const SizedBox.shrink();
   }
 
   Widget _buildMessageList({
@@ -349,6 +614,10 @@ class _MessagesScreenState extends State<MessagesScreen>
                 _reactionWidgetAnimationControler.reset();
 
                 _reactionWidgetAnimationControler.forward();
+
+                _emojiIconsAnimationController.reset();
+
+                _emojiIconsAnimationController.forward();
 
                 showAddReactionWidget = true;
               }
